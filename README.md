@@ -1,1 +1,1 @@
-# swen3006-project-one
+# Automail

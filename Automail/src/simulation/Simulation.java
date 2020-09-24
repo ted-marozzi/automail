@@ -4,7 +4,6 @@ import exceptions.ExcessiveDeliveryException;
 import exceptions.ItemTooHeavyException;
 import exceptions.MailAlreadyDeliveredException;
 
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -93,15 +92,17 @@ public class Simulation {
     static private Properties setUpProperties() throws IOException {
     	Properties automailProperties = new Properties();
 		// Default properties
-    	// automailProperties.setProperty("Robots", "Big,Careful,Standard,Weak");
+		// automailProperties.setProperty("Robots", "Big,Careful,Standard,Weak");
+		
+		final String FALSE = "false";
     	automailProperties.setProperty("Robots", "Standard");
     	automailProperties.setProperty("MailPool", "strategies.SimpleMailPool");
     	automailProperties.setProperty("Floors", "10");
-    	automailProperties.setProperty("Fragile", "false");
+    	automailProperties.setProperty("Fragile", FALSE);
     	automailProperties.setProperty("Mail_to_Create", "80");
     	automailProperties.setProperty("Mail_Receving_Length", "100");
-    	automailProperties.setProperty("Overdrive", "false");
-    	automailProperties.setProperty("Statistics", "false");
+    	automailProperties.setProperty("Overdrive", FALSE);
+    	automailProperties.setProperty("Statistics", FALSE);
 
     	// Read properties
 		FileReader inStream = null;

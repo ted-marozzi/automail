@@ -6,9 +6,6 @@ import simulation.Building;
 import simulation.Clock;
 import simulation.IMailDelivery;
 
-import java.util.Map;
-import java.util.TreeMap;
-
 /**
  * The robot delivers mail!
  */
@@ -160,8 +157,6 @@ public class Robot {
 		return tube;
 	}
     
-	static private int count = 0;
-	static private Map<Integer, Integer> hashMap = new TreeMap<Integer, Integer>();
 
 //	@Override
 //	public int hashCode() {

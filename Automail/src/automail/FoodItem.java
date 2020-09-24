@@ -5,7 +5,7 @@ package automail;
 /**
  * Represents a mail item
  */
-public class MailItem extends DeliveryItem {
+public class FoodItem extends DeliveryItem {
 	
 
 
@@ -15,7 +15,7 @@ public class MailItem extends DeliveryItem {
      * @param arrival_time the time that the mail arrived
      * @param weight the weight of this mail item
      */
-    public MailItem(int dest_floor, int arrival_time, int weight){
+    public FoodItem(int dest_floor, int arrival_time, int weight){
         super(dest_floor, arrival_time, weight);
     }
 

@@ -64,7 +64,7 @@ public class Simulation {
          * This code section is for running a simulation
          */
         /* Instantiate MailPool and Automail */
-     	MailPool mailPool = new MailPool(NUM_ROBOTS);
+     	MailPool mailPool = new MailPool();
         Automail automail = new Automail(mailPool, new ReportDelivery(), NUM_ROBOTS);
         MailGenerator mailGenerator = new MailGenerator(MAIL_TO_CREATE, MAIL_MAX_WEIGHT, mailPool, seedMap);
         
@@ -72,9 +72,10 @@ public class Simulation {
         mailGenerator.generateAllMail();
         // PriorityMailItem priority;  // Not used in this version
         while(MAIL_DELIVERED.size() != mailGenerator.MAIL_TO_CREATE) {
-        	// System.out.printf("Delivered: %4d; Created: %4d%n", MAIL_DELIVERED.size(), mailGenerator.MAIL_TO_CREATE);
+			// Given the time, add items to the mail pool
             mailGenerator.addToMailPool();
             try {
+				// For each waiting robot loads one or two pieces of mail 
                 automail.mailPool.loadItemsToRobot();
 				for (int i=0; i < NUM_ROBOTS; i++) {
 					automail.robots[i].operate();

@@ -139,17 +139,15 @@ public class MailGenerator {
      * @return Priority
      */
     public void addToMailPool(){
-    	//Priority is not used
-//    	PriorityMailItem priority = null;
+
     	// Check if there are any mail to create
         if(this.allMail.containsKey(Clock.Time())){
-            for(MailItem mailItem : allMail.get(Clock.Time())){
-//            	if (mailItem instanceof PriorityMailItem) priority = ((PriorityMailItem) mailItem);
+            for(MailItem mailItem : allMail.get(Clock.Time())){         
                 System.out.printf("T: %3d > new addToPool [%s]%n", Clock.Time(), mailItem.toString());
                 mailPool.addToPool(mailItem);
             }
         }
-//        return priority;
+
     }
     
 }

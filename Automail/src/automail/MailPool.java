@@ -48,7 +48,7 @@ public class MailPool {
 	private LinkedList<Item> pool;
 	private LinkedList<Robot> robots;
 
-	public MailPool(int nrobots){
+	public MailPool(){
 		// Start empty
 		pool = new LinkedList<Item>();
 		robots = new LinkedList<Robot>();
@@ -68,29 +68,30 @@ public class MailPool {
 	
 	/**
      * load up any waiting robots with mailItems, if any.
+	 * 
      */
 	public void loadItemsToRobot() throws ItemTooHeavyException {
 		//List available robots
 		ListIterator<Robot> i = robots.listIterator();
 		while (i.hasNext()) loadItem(i);
 	}
-	
+	//TODO: Add logic determining if its a food or mail item, use add to food tube method
 	//load items to the robot
 	private void loadItem(ListIterator<Robot> i) throws ItemTooHeavyException {
 		Robot robot = i.next();
 		assert(robot.isEmpty());
-		// System.out.printf("P: %3d%n", pool.size());
+
 		ListIterator<Item> j = pool.listIterator();
 		if (pool.size() > 0) {
 			try {
-			robot.addToHand(j.next().mailItem); // hand first as we want higher priority delivered first
-			j.remove();
-			if (pool.size() > 0) {
-				robot.addToTube(j.next().mailItem);
+				robot.addToHand(j.next().mailItem); // hand first as we want higher priority delivered first
 				j.remove();
-			}
-			robot.dispatch(); // send the robot off if it has any items to deliver
-			i.remove();       // remove from mailPool queue
+				if (pool.size() > 0) {
+					robot.addToTube(j.next().mailItem);
+					j.remove();
+				}
+				robot.dispatch(); // send the robot off if it has any items to deliver
+				i.remove();       // remove from mailPool queue
 			} catch (Exception e) { 
 	            throw e; 
 	        } 

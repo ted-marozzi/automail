@@ -10,7 +10,7 @@ import simulation.IMailDelivery;
  * The robot delivers mail!
  */
 public class Robot {
-	
+	// TODO: boolean hasFoodTube
     static public final int INDIVIDUAL_MAX_WEIGHT = 2000;
 
     IMailDelivery delivery;
@@ -53,6 +53,8 @@ public class Robot {
     public void dispatch() {
     	receivedDispatch = true;
     }
+
+    //TODO detach food tube
 
     /**
      * This is called on every time step
@@ -114,6 +116,8 @@ public class Robot {
     	}
     }
 
+    // TODO add to food tube method, address LIFO stack
+
     /**
      * Sets the route for the robot
      */
@@ -158,13 +162,6 @@ public class Robot {
 	}
     
 
-//	@Override
-//	public int hashCode() {
-//		Integer hash0 = super.hashCode();
-//		Integer hash = hashMap.get(hash0);
-//		if (hash == null) { hash = count++; hashMap.put(hash0, hash); }
-//		return hash;
-//	}
 
 	public boolean isEmpty() {
 		return (deliveryItem == null && tube == null);

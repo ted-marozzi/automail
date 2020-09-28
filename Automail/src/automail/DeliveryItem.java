@@ -6,8 +6,9 @@ import java.util.Map;
 public abstract class DeliveryItem {
     
 
-    public DeliveryItem(int destFloor, int arrivalTime, int weight){
+    public DeliveryItem(int destFloor, int arrivalTime, int weight, String itemType){
         this.destinationFloor = destFloor;
+        this.itemType = itemType;
         this.id = String.valueOf(hashCode());
         this.arrivalTime = arrivalTime;
         this.weight = weight;
@@ -22,7 +23,13 @@ public abstract class DeliveryItem {
     protected final int arrivalTime;
     /** The weight in grams of the mail item */
     protected final int weight;
-    
+
+    private final String itemType;
+
+    public String getItemType() {
+        return itemType;
+    }
+
     /**
      *
      * @return the destination floor of the mail item
@@ -57,6 +64,13 @@ public abstract class DeliveryItem {
 
    private static int count = 0;
    private static Map<Integer, Integer> hashMap = new TreeMap<Integer, Integer>();
+
+
+    @Override
+    public String toString(){
+        return String.format("%s Item:: ID: %6s | Arrival: %4d | Destination: %2d | Weight: %4d", itemType, id, arrivalTime, destinationFloor, weight);
+    }
+
 
    @Override
    public int hashCode() {

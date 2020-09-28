@@ -1,5 +1,6 @@
 package simulation;
 
+import automail.DeliveryItem;
 import exceptions.ExcessiveDeliveryException;
 import exceptions.ItemTooHeavyException;
 import exceptions.MailAlreadyDeliveredException;
@@ -26,8 +27,12 @@ public class Simulation {
     
     private static boolean OVERDRIVE_ENABLED;
     private static boolean STATISTICS_ENABLED;
-    
-    private static ArrayList<MailItem> MAIL_DELIVERED;
+
+	private static boolean DELIVER_FOOD;
+    public static boolean getDEVLIVER_FOOD()	{
+    	return DELIVER_FOOD;
+	}
+    private static ArrayList<DeliveryItem> MAIL_DELIVERED;
     private static double total_delay = 0;
 
     public static void main(String[] args) throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException {
@@ -35,7 +40,7 @@ public class Simulation {
     	Properties automailProperties = setUpProperties();
     	
     	//An array list to record mails that have been delivered
-        MAIL_DELIVERED = new ArrayList<MailItem>();
+        MAIL_DELIVERED = new ArrayList<DeliveryItem>();
                 
         
         
@@ -138,14 +143,16 @@ public class Simulation {
 		NUM_ROBOTS = Integer.parseInt(automailProperties.getProperty("Robots"));
 		System.out.print("#Robots: "); System.out.println(NUM_ROBOTS);
 		assert(NUM_ROBOTS > 0);
-		
+
+		DELIVER_FOOD = Boolean.parseBoolean(automailProperties.getProperty("DeliverFood"));
+		System.out.print("#Delivering Food: "); System.out.println(DELIVER_FOOD);
 		return automailProperties;
     }
     
     static class ReportDelivery implements IMailDelivery {
     	
     	/** Confirm the delivery and calculate the total score */
-    	public void deliver(MailItem deliveryItem){
+    	public void deliver(DeliveryItem deliveryItem){
     		if(!MAIL_DELIVERED.contains(deliveryItem)){
     			MAIL_DELIVERED.add(deliveryItem);
                 System.out.printf("T: %3d > Delivered(%4d) [%s]%n", Clock.Time(), MAIL_DELIVERED.size(), deliveryItem.toString());
@@ -163,7 +170,7 @@ public class Simulation {
 
     }
     
-    private static double calculateDeliveryDelay(MailItem deliveryItem) {
+    private static double calculateDeliveryDelay(DeliveryItem deliveryItem) {
     	// Penalty for longer delivery times
     	final double penalty = 1.2;
     	double priority_weight = 0;
@@ -179,4 +186,6 @@ public class Simulation {
         System.out.println("Final Delivery time: "+Clock.Time());
         System.out.printf("Delay: %.2f%n", total_delay);
     }
+
+
 }

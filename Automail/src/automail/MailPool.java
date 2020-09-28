@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.ListIterator;
 
 import exceptions.ItemTooHeavyException;
+import simulation.Clock;
 import simulation.PriorityMailItem;
 
 /**
@@ -18,13 +19,13 @@ public class MailPool {
 	private class Item {
 		int priority;
 		int destination;
-		MailItem mailItem;
+		DeliveryItem deliveryItem;
 		// Use stable sort to keep arrival time relative positions
 		
-		public Item(MailItem mailItem) {
-			priority = (mailItem instanceof PriorityMailItem) ? ((PriorityMailItem) mailItem).getPriorityLevel() : 1;
-			destination = mailItem.getDestFloor();
-			this.mailItem = mailItem;
+		public Item(DeliveryItem deliveryItem) {
+			priority = (deliveryItem instanceof PriorityMailItem) ? ((PriorityMailItem) deliveryItem).getPriorityLevel() : 1;
+			destination = deliveryItem.getDestFloor();
+			this.deliveryItem = deliveryItem;
 		}
 	}
 	
@@ -58,7 +59,7 @@ public class MailPool {
      * Adds an item to the mail pool
      * @param mailItem the mail item being added.
      */
-	public void addToPool(MailItem mailItem) {
+	public void addToPool(DeliveryItem mailItem) {
 		Item item = new Item(mailItem);
 		pool.add(item);
 		pool.sort(new ItemComparator());
@@ -82,17 +83,48 @@ public class MailPool {
 		assert(robot.isEmpty());
 
 		ListIterator<Item> j = pool.listIterator();
+
+
 		if (pool.size() > 0) {
 			try {
-				robot.addToHand(j.next().mailItem); // hand first as we want higher priority delivered first
-				j.remove();
-				if (pool.size() > 0) {
-					robot.addToTube(j.next().mailItem);
+				DeliveryItem item = j.next().deliveryItem;
+				if(item.getItemType().equals("Mail") && robot.foodItemsLoaded() == 0) {
+					robot.attachArms();
+					robot.addToHand((MailItem) item); // hand first as we want higher priority delivered first
 					j.remove();
+					if(j.hasNext())	{
+						DeliveryItem item2 = j.next().deliveryItem;
+						if (pool.size() > 0 && item2.getItemType().equals("Mail")) {
+							robot.addToTube((MailItem) item2);
+							j.remove();
+
+						}
+					}
+					robot.dispatch(); // send the robot off if it has any items to deliver
+
+					i.remove();       // remove from mailPool queue
+				}	else if (item.getItemType().equals("Food")) {
+					robot.attachFoodTube();
+
+					robot.addToFoodTube((FoodItem)item);
+					j.remove();
+
+					while (robot.foodItemsLoaded() < Robot.getFoodTubeCap())	{
+						DeliveryItem item3 = j.next().deliveryItem;
+						if(item3.getItemType().equals("Food"))	{
+							robot.addToFoodTube((FoodItem) item3);
+							j.remove();
+						}
+					}
+					// Rules for dispatch
+					if(robot.foodItemsLoaded() == Robot.getFoodTubeCap() &&
+							Clock.Time()-robot.getHeatingStarted() > 5)	{
+						robot.dispatch();
+
+					}
+
 				}
-				robot.dispatch(); // send the robot off if it has any items to deliver
-				i.remove();       // remove from mailPool queue
-			} catch (Exception e) { 
+			} catch (Exception e) {
 	            throw e; 
 	        } 
 		}

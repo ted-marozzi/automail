@@ -6,11 +6,14 @@ import simulation.Building;
 import simulation.Clock;
 import simulation.IMailDelivery;
 
+import java.util.Stack;
+
 /**
  * The robot delivers mail!
  */
 public class Robot {
-	// TODO: boolean hasFoodTube
+
+    private boolean armsAttached = true;
     static public final int INDIVIDUAL_MAX_WEIGHT = 2000;
 
     IMailDelivery delivery;
@@ -23,10 +26,14 @@ public class Robot {
     private MailPool mailPool;
     private boolean receivedDispatch;
     
-    private MailItem deliveryItem = null;
+    private DeliveryItem deliveryItem = null;
     private MailItem tube = null;
     
     private int deliveryCounter;
+
+    private int heatingStarted;
+
+    private Stack<FoodItem> foodTube = new Stack<>();
     
 
     /**
@@ -54,7 +61,7 @@ public class Robot {
     	receivedDispatch = true;
     }
 
-    //TODO detach food tube
+
 
     /**
      * This is called on every time step
@@ -66,14 +73,24 @@ public class Robot {
     		case RETURNING:
     			/** If its current position is at the mailroom, then the robot should change state */
                 if(current_floor == Building.MAILROOM_LOCATION){
-                	if (tube != null) {
-                		mailPool.addToPool(tube);
-                        System.out.printf("T: %3d > old addToPool [%s]%n", Clock.Time(), tube.toString());
-                        tube = null;
-                	}
-        			/** Tell the sorter the robot is ready */
-        			mailPool.registerWaiting(this);
-                	changeState(RobotState.WAITING);
+                    if(armsAttached) {
+
+                        if (tube != null) {
+                            mailPool.addToPool(tube);
+                            System.out.printf("T: %3d > old addToPool [%s]%n", Clock.Time(), tube.toString());
+                            tube = null;
+                        }
+
+                    } else if (!armsAttached)    {
+                        while(!foodTube.isEmpty()) {
+                            FoodItem food = foodTube.pop();
+                            mailPool.addToPool(food);
+                            System.out.printf("T: %3d > old addToPool [%s]%n", Clock.Time(), food.toString());
+                        }
+                    }
+                    /** Tell the sorter the robot is ready */
+                    mailPool.registerWaiting(this);
+                    changeState(RobotState.WAITING);
                 } else {
                 	/** If the robot is not at the mailroom floor yet, then move towards it! */
                     moveTowards(Building.MAILROOM_LOCATION);
@@ -91,23 +108,38 @@ public class Robot {
     		case DELIVERING:
     			if(current_floor == destination_floor){ // If already here drop off either way
                     /** Delivery complete, report this to the simulator! */
-                    delivery.deliver(deliveryItem);
+
+                    if(armsAttached)   {
+                        delivery.deliver(deliveryItem);
+                        /** Check if want to return, i.e. if there is no item in the tube*/
+                        if(tube == null){
+                            changeState(RobotState.RETURNING);
+                        }
+                        else{
+                            /** If there is another item, set the robot's route to the location to deliver the item */
+                            deliveryItem = tube;
+                            tube = null;
+                            setDestination();
+                            changeState(RobotState.DELIVERING);
+                        }
+                    } else if (!armsAttached)   {
+                        foodTube.pop();
+                        if(foodItemsLoaded() == 0)  {
+                            changeState(RobotState.RETURNING);
+                        } else  {
+                            setDestination();
+                            changeState(RobotState.DELIVERING);
+
+
+                        }
+
+                    }
                     deliveryItem = null;
                     deliveryCounter++;
                     if(deliveryCounter > 2){  // Implies a simulation bug
-                    	throw new ExcessiveDeliveryException();
+                        throw new ExcessiveDeliveryException();
                     }
-                    /** Check if want to return, i.e. if there is no item in the tube*/
-                    if(tube == null){
-                    	changeState(RobotState.RETURNING);
-                    }
-                    else{
-                        /** If there is another item, set the robot's route to the location to deliver the item */
-                        deliveryItem = tube;
-                        tube = null;
-                        setDestination();
-                        changeState(RobotState.DELIVERING);
-                    }
+
     			} else {
 	        		/** The robot is not at the destination yet, move towards it! */
 	                moveTowards(destination_floor);
@@ -116,14 +148,20 @@ public class Robot {
     	}
     }
 
-    // TODO add to food tube method, address LIFO stack
+
 
     /**
      * Sets the route for the robot
      */
     private void setDestination() {
-        /** Set the destination floor */
-        destination_floor = deliveryItem.getDestFloor();
+
+        if(armsAttached)    {
+            /** Set the destination floor */
+            destination_floor = deliveryItem.getDestFloor();
+
+        } else if (!armsAttached)   {
+            destination_floor = foodTube.peek().getDestFloor();
+        }
     }
 
     /**
@@ -178,5 +216,32 @@ public class Robot {
 		tube = mailItem;
 		if (tube.weight > INDIVIDUAL_MAX_WEIGHT) throw new ItemTooHeavyException();
 	}
+
+	public void attachArms() {
+        armsAttached = true;
+    }
+
+    public void attachFoodTube() {
+        armsAttached = false;
+    }
+
+    public void addToFoodTube(FoodItem food) {
+        if(foodTube.size() == 0 )   {
+            heatingStarted = Clock.Time();
+        }
+        foodTube.push(food);
+    }
+
+    public int getHeatingStarted()  {
+        return heatingStarted;
+    }
+
+    public int foodItemsLoaded()    {
+        return foodTube.size();
+    }
+
+    public static int getFoodTubeCap()    {
+        return 3;
+    }
 
 }

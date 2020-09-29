@@ -39,9 +39,9 @@ public class Robot {
     /**
      * Initiates the robot's location at the start to be at the mailroom
      * also set it to be waiting for mail.
-     * @param behaviour governs selection of mail items for delivery and behaviour on priority arrivals
      * @param delivery governs the final delivery
      * @param mailPool is the source of mail items
+     * @param number governs selection of mail items for delivery and behaviour on priority arrivals
      */
     public Robot(IMailDelivery delivery, MailPool mailPool, int number){
     	this.id = "R" + number;
@@ -79,6 +79,7 @@ public class Robot {
                             mailPool.addToPool(tube);
                             System.out.printf("T: %3d > old addToPool [%s]%n", Clock.Time(), tube.toString());
                             tube = null;
+                            deliveryCounter = 0;
                         }
 
                     } else if (!armsAttached)    {
@@ -86,6 +87,7 @@ public class Robot {
                             FoodItem food = foodTube.pop();
                             mailPool.addToPool(food);
                             System.out.printf("T: %3d > old addToPool [%s]%n", Clock.Time(), food.toString());
+                            deliveryCounter = 0;
                         }
                     }
                     /** Tell the sorter the robot is ready */
@@ -98,19 +100,32 @@ public class Robot {
                 }
     		case WAITING:
                 /** If the StorageTube is ready and the Robot is waiting in the mailroom then start the delivery */
-                if(!isEmpty() && receivedDispatch){
-                	receivedDispatch = false;
-                	deliveryCounter = 0; // reset delivery counter
-                	setDestination();
-                	changeState(RobotState.DELIVERING);
+                if(armsAttached)    {
+                    if(!isEmpty() && receivedDispatch){
+                        receivedDispatch = false;
+                        deliveryCounter = 0; // reset delivery counter
+                        setDestination();
+                        changeState(RobotState.DELIVERING);
+                    }
+                    break;
+
+                } else if (!armsAttached)   {
+                    if(!foodTube.isEmpty() && receivedDispatch){
+                        receivedDispatch = false;
+                        deliveryCounter = 0; // reset delivery counter
+                        setDestination();
+                        changeState(RobotState.DELIVERING);
+                    }
+                    break;
                 }
-                break;
+
     		case DELIVERING:
     			if(current_floor == destination_floor){ // If already here drop off either way
                     /** Delivery complete, report this to the simulator! */
 
                     if(armsAttached)   {
                         delivery.deliver(deliveryItem);
+                        deliveryItem = null;
                         /** Check if want to return, i.e. if there is no item in the tube*/
                         if(tube == null){
                             changeState(RobotState.RETURNING);
@@ -122,23 +137,33 @@ public class Robot {
                             setDestination();
                             changeState(RobotState.DELIVERING);
                         }
+
+                        deliveryCounter++;
+                        if(deliveryCounter > 2){  // Implies a simulation bug
+                            throw new ExcessiveDeliveryException();
+                        }
+
+
                     } else if (!armsAttached)   {
-                        foodTube.pop();
+                        delivery.deliver(foodTube.pop());
                         if(foodItemsLoaded() == 0)  {
                             changeState(RobotState.RETURNING);
                         } else  {
                             setDestination();
                             changeState(RobotState.DELIVERING);
-
-
                         }
 
+                        deliveryCounter++;
+                        if(deliveryCounter > 3){  // Implies a simulation bug
+                            throw new ExcessiveDeliveryException();
+                        }
+
+
+
+
                     }
-                    deliveryItem = null;
-                    deliveryCounter++;
-                    if(deliveryCounter > 2){  // Implies a simulation bug
-                        throw new ExcessiveDeliveryException();
-                    }
+
+
 
     			} else {
 	        		/** The robot is not at the destination yet, move towards it! */
@@ -179,20 +204,39 @@ public class Robot {
     private String getIdTube() {
     	return String.format("%s(%1d)", this.id, (tube == null ? 0 : 1));
     }
+
+    private String getIdFoodTube() {
+        return String.format("%s(%1d)", this.id, foodTube.size());
+    }
     
     /**
      * Prints out the change in state
      * @param nextState the state to which the robot is transitioning
      */
     private void changeState(RobotState nextState){
-    	assert(!(deliveryItem == null && tube != null));
-    	if (current_state != nextState) {
-            System.out.printf("T: %3d > %7s changed from %s to %s%n", Clock.Time(), getIdTube(), current_state, nextState);
-    	}
-    	current_state = nextState;
-    	if(nextState == RobotState.DELIVERING){
-            System.out.printf("T: %3d > %7s-> [%s]%n", Clock.Time(), getIdTube(), deliveryItem.toString());
-    	}
+        if(this.armsAttached)
+        {
+            assert(!(deliveryItem == null && tube != null));
+            if (current_state != nextState) {
+                System.out.printf("T: %3d > %7s changed from %s to %s%n", Clock.Time(), getIdTube(), current_state, nextState);
+            }
+            current_state = nextState;
+            if(nextState == RobotState.DELIVERING){
+                System.out.printf("T: %3d > %7s-> [%s]%n", Clock.Time(), getIdTube(), deliveryItem.toString());
+            }
+
+        } else if(!this.armsAttached)   {
+
+            if (current_state != nextState) {
+                System.out.printf("T: %3d > %7s changed from %s to %s%n", Clock.Time(), getIdFoodTube(), current_state, nextState);
+            }
+            current_state = nextState;
+            if(nextState == RobotState.DELIVERING){
+                System.out.printf("T: %3d > %7s-> [%s]%n", Clock.Time(), getIdFoodTube(), foodTube.peek().toString());
+            }
+
+        }
+
     }
 
 	public MailItem getTube() {

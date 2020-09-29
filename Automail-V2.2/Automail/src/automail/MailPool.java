@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.ListIterator;
 
 import exceptions.ItemTooHeavyException;
-import simulation.Clock;
 import simulation.PriorityMailItem;
 
 /**
@@ -19,13 +18,13 @@ public class MailPool {
 	private class Item {
 		int priority;
 		int destination;
-		DeliveryItem deliveryItem;
+		MailItem mailItem;
 		// Use stable sort to keep arrival time relative positions
 		
-		public Item(DeliveryItem deliveryItem) {
-			priority = (deliveryItem instanceof PriorityMailItem) ? ((PriorityMailItem) deliveryItem).getPriorityLevel() : 1;
-			destination = deliveryItem.getDestFloor();
-			this.deliveryItem = deliveryItem;
+		public Item(MailItem mailItem) {
+			priority = (mailItem instanceof PriorityMailItem) ? ((PriorityMailItem) mailItem).getPriorityLevel() : 1;
+			destination = mailItem.getDestFloor();
+			this.mailItem = mailItem;
 		}
 	}
 	
@@ -49,7 +48,7 @@ public class MailPool {
 	private LinkedList<Item> pool;
 	private LinkedList<Robot> robots;
 
-	public MailPool(){
+	public MailPool(int nrobots){
 		// Start empty
 		pool = new LinkedList<Item>();
 		robots = new LinkedList<Robot>();
@@ -59,7 +58,7 @@ public class MailPool {
      * Adds an item to the mail pool
      * @param mailItem the mail item being added.
      */
-	public void addToPool(DeliveryItem mailItem) {
+	public void addToPool(MailItem mailItem) {
 		Item item = new Item(mailItem);
 		pool.add(item);
 		pool.sort(new ItemComparator());
@@ -69,73 +68,33 @@ public class MailPool {
 	
 	/**
      * load up any waiting robots with mailItems, if any.
-	 * 
      */
 	public void loadItemsToRobot() throws ItemTooHeavyException {
 		//List available robots
 		ListIterator<Robot> i = robots.listIterator();
 		while (i.hasNext()) loadItem(i);
 	}
-	//TODO: Add logic determining if its a food or mail item, use add to food tube method
+	
 	//load items to the robot
 	private void loadItem(ListIterator<Robot> i) throws ItemTooHeavyException {
 		Robot robot = i.next();
 		assert(robot.isEmpty());
-
+		// System.out.printf("P: %3d%n", pool.size());
 		ListIterator<Item> j = pool.listIterator();
-
-		// Rules for dispatch
-		if(robot.foodItemsLoaded() == Robot.getFoodTubeCap() &&
-				Clock.Time()-robot.getHeatingStarted() >= 5)	{
-			robot.dispatch();
-			i.remove();
-
-		}
-
-
 		if (pool.size() > 0) {
 			try {
-				DeliveryItem item = j.next().deliveryItem;
-				if(item.getItemType().equals("Mail") && robot.foodItemsLoaded() == 0) {
-					robot.attachArms();
-					robot.addToHand((MailItem) item); // hand first as we want higher priority delivered first
-					j.remove();
-					if(j.hasNext())	{
-						DeliveryItem item2 = j.next().deliveryItem;
-						if (pool.size() > 0 && item2.getItemType().equals("Mail")) {
-							robot.addToTube((MailItem) item2);
-							j.remove();
-
-						}
-					}
-					robot.dispatch(); // send the robot off if it has any items to deliver
-
-					i.remove();       // remove from mailPool queue
-				}	else if (item.getItemType().equals("Food") && robot.foodItemsLoaded() < Robot.getFoodTubeCap()) {
-					robot.attachFoodTube();
-
-					robot.addToFoodTube((FoodItem)item);
-					j.remove();
-
-					while (robot.foodItemsLoaded() < Robot.getFoodTubeCap())	{
-						DeliveryItem item3 = j.next().deliveryItem;
-						if(item3.getItemType().equals("Food"))	{
-							robot.addToFoodTube((FoodItem) item3);
-							j.remove();
-						}
-					}
-
-
-				}
-
-
-
-			} catch (Exception e) {
+			robot.addToHand(j.next().mailItem); // hand first as we want higher priority delivered first
+			j.remove();
+			if (pool.size() > 0) {
+				robot.addToTube(j.next().mailItem);
+				j.remove();
+			}
+			robot.dispatch(); // send the robot off if it has any items to deliver
+			i.remove();       // remove from mailPool queue
+			} catch (Exception e) { 
 	            throw e; 
 	        } 
 		}
-
-
 	}
 
 	/**

@@ -59,7 +59,7 @@ public class MailGenerator {
         int arrivalTime = generateArrivalTime();
         int weight = generateWeight();
         String itemType = "Mail";
-        if(random.nextFloat() < 0.5 && Simulation.getDEVLIVER_FOOD())
+        if(Simulation.getDELIVER_FOOD() && random.nextFloat() < 0.5)
             itemType = "Food";
             // Check if arrival time has a priority mail
         if(	(random.nextInt(6) > 0) ||  // Skew towards non priority mail

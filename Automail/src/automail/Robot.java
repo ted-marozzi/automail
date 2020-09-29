@@ -158,12 +158,7 @@ public class Robot {
                             throw new ExcessiveDeliveryException();
                         }
 
-
-
-
                     }
-
-
 
     			} else {
 	        		/** The robot is not at the destination yet, move towards it! */

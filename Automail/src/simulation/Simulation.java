@@ -29,7 +29,7 @@ public class Simulation {
     private static boolean STATISTICS_ENABLED;
 
 	private static boolean DELIVER_FOOD;
-    public static boolean getDEVLIVER_FOOD()	{
+    public static boolean getDELIVER_FOOD()	{
     	return DELIVER_FOOD;
 	}
     private static ArrayList<DeliveryItem> MAIL_DELIVERED;
@@ -145,7 +145,7 @@ public class Simulation {
 		assert(NUM_ROBOTS > 0);
 
 		DELIVER_FOOD = Boolean.parseBoolean(automailProperties.getProperty("DeliverFood"));
-		System.out.print("#Delivering Food: "); System.out.println(DELIVER_FOOD);
+
 		return automailProperties;
     }
     

@@ -84,34 +84,16 @@ public class MailPool {
 
 		ListIterator<Item> j = pool.listIterator();
 
-		if (pool.size() == 0 && !robot.isArmsAttached()) {
-
-			if (Clock.Time() - robot.getHeatingStarted() >= 5) {
-
-				robot.dispatch(); // send the robot off if it has any items to
-				// deliver
-				i.remove();
-			}
-		}
-
-
-
 		if (pool.size() > 0) {
 			try {
 
 				DeliveryItem item = j.next().deliveryItem;
-				String itemType = item.getItemType();
-				if (itemType.equals("Food") || !robot.isArmsAttached()) {
 
-					if (robot.isArmsAttached()) {
-						robot.attachFoodTube();
+				if (item.getItemType().equals("Food")) {
 
-					}
 
-					if (itemType.equals("Food") && robot.foodItemsLoaded() < 3) {
-						robot.addToFoodTube((FoodItem)item);
-						j.remove();
-					}
+					robot.addToFoodTube((FoodItem) item);
+					j.remove();
 
 					while (j.hasNext() && robot.foodItemsLoaded() < 3) {
 						DeliveryItem item2 = j.next().deliveryItem;
@@ -121,20 +103,20 @@ public class MailPool {
 						}
 					}
 
-					if (Clock.Time() - robot.getHeatingStarted() >= 5) {
-						robot.dispatch(); // send the robot off if it has any items to
-						// deliver
-						i.remove();
-					}
+					robot.dispatch(); // send the robot off if it has any items to
+					// deliver
+					i.remove();
 
-				} else if (robot.isArmsAttached()) {
+
+
+				} else if (item.getItemType().equals("Mail")) {
 					assert (robot.isEmpty());
 					robot.addToHand((MailItem) item);
 					j.remove();
 
 					while (j.hasNext() && robot.istubeEmpty()) {
 						DeliveryItem item2 = j.next().deliveryItem;
-						if (!(item2.getItemType().equals("Food"))) {
+						if (item2.getItemType().equals("Mail")) {
 							robot.addToTube((MailItem)j.previous().deliveryItem);
 							j.remove();
 						}

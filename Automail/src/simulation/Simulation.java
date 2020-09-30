@@ -14,6 +14,8 @@ import java.util.Properties;
 import automail.Automail;
 import automail.MailItem;
 import automail.MailPool;
+import static java.lang.System.out;
+
 
 /**
  * This class simulates the behaviour of AutoMail
@@ -82,6 +84,7 @@ public class Simulation {
             try {
 				// For each waiting robot loads one or two pieces of mail 
                 automail.mailPool.loadItemsToRobot();
+
 				for (int i=0; i < NUM_ROBOTS; i++) {
 					automail.robots[i].operate();
 				}

@@ -6,21 +6,17 @@ import simulation.Building;
 import simulation.Clock;
 import simulation.IMailDelivery;
 
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * The robot delivers mail!
  */
 public class Robot {
 
-    private boolean armsAttached = true;
+    private boolean isMailMode = true;
 
-    public boolean isArmsAttached() {
-        return armsAttached;
+    public boolean isMailMode() {
+        return isMailMode;
     }
 
     static public final int INDIVIDUAL_MAX_WEIGHT = 2000;
@@ -44,9 +40,7 @@ public class Robot {
 
     private Stack<FoodItem> foodTube = new Stack<>();
 
-    //private static Queue<String>[Building.FLOORS] lockedFloors;
-    //private ArrayList[] lockedFloors = new ArrayList[Building.FLOORS];
-    ArrayList<Queue<String>> lockedFloors = new ArrayList<Queue<String>>(Building.FLOORS);
+
 
     /**
      * Initiates the robot's location at the start to be at the mailroom
@@ -85,7 +79,7 @@ public class Robot {
     		case RETURNING:
     			/** If its current position is at the mailroom, then the robot should change state */
                 if(current_floor == Building.MAILROOM_LOCATION){
-                    if(armsAttached) {
+                    if(isMailMode) {
 
                         if (tube != null) {
                             mailPool.addToPool(tube);
@@ -94,7 +88,7 @@ public class Robot {
                             deliveryCounter = 0;
                         }
 
-                    } else if (!armsAttached)    {
+                    } else if (!isMailMode)    {
                         while(!foodTube.isEmpty()) {
                             FoodItem food = foodTube.pop();
                             mailPool.addToPool(food);
@@ -112,7 +106,7 @@ public class Robot {
                 }
     		case WAITING:
                 /** If the StorageTube is ready and the Robot is waiting in the mailroom then start the delivery */
-                if(armsAttached)    {
+                if(isMailMode)    {
                     if(!isEmpty() && receivedDispatch){
                         receivedDispatch = false;
                         deliveryCounter = 0; // reset delivery counter
@@ -121,8 +115,8 @@ public class Robot {
                     }
                     break;
 
-                } else if (!armsAttached)   {
-                    if(!foodTube.isEmpty() && receivedDispatch){
+                } else if (!isMailMode)   {
+                    if(!foodTube.isEmpty() && receivedDispatch && Clock.Time() - heatingStarted >= 5){
                         receivedDispatch = false;
                         deliveryCounter = 0; // reset delivery counter
                         setDestination();
@@ -133,10 +127,10 @@ public class Robot {
                 }
 
     		case DELIVERING:
-    			if(current_floor == destination_floor){ // If already here drop off either way
+    			if(current_floor == destination_floor && (FloorManager.getInstance().getLockedFloors().get(current_floor-1).peek() == this.id || FloorManager.getInstance().getLockedFloors().get(current_floor-1).peek() == null)) { // If already here drop off either way
                     /** Delivery complete, report this to the simulator! */
 
-                    if(armsAttached)   {
+                    if(isMailMode)   {
                         delivery.deliver(deliveryItem);
                         deliveryItem = null;
                         /** Check if want to return, i.e. if there is no item in the tube*/
@@ -158,10 +152,11 @@ public class Robot {
                         }
 
 
-                    } else if (!armsAttached)   {
+                    } else if (!isMailMode)   {
                         delivery.deliver(foodTube.pop());
+                        FloorManager.getInstance().getLockedFloors().get(destination_floor-1).remove();
                         if(foodItemsLoaded() == 0)  {
-                            armsAttached = true;
+                            isMailMode = true;
                             changeState(RobotState.RETURNING);
                         } else  {
                             setDestination();
@@ -190,18 +185,22 @@ public class Robot {
      */
     private void setDestination() {
 
-        if(armsAttached)    {
+        if(isMailMode)    {
             /** Set the destination floor */
             destination_floor = deliveryItem.getDestFloor();
 
-        } else if (!armsAttached)   {
+        } else if (!isMailMode)   {
             destination_floor = foodTube.peek().getDestFloor();
-            lockedFloors.get(destination_floor-1).add(this.id);
+            FloorManager.getInstance().lockFloor(destination_floor, this.id);
+
+
         }
 
-        for (int i = 0; i < Building.FLOORS; i++){
-            System.out.println(lockedFloors.get(i).peek());
-        }
+
+
+
+
+
     }
 
     /**
@@ -211,7 +210,7 @@ public class Robot {
     private void moveTowards(int destination) {
         if(current_floor < destination){
             current_floor++;
-        } else {
+        } else if(current_floor > destination) {
             current_floor--;
         }
     }
@@ -229,7 +228,7 @@ public class Robot {
      * @param nextState the state to which the robot is transitioning
      */
     private void changeState(RobotState nextState){
-        if(this.armsAttached)
+        if(this.isMailMode)
         {
             assert(!(deliveryItem == null && tube != null));
             if (current_state != nextState) {
@@ -240,7 +239,7 @@ public class Robot {
                 System.out.printf("T: %3d > %7s-> [%s]%n", Clock.Time(), getIdTube(), deliveryItem.toString());
             }
 
-        } else if(!this.armsAttached)   {
+        } else if(!this.isMailMode)   {
 
             if (current_state != nextState) {
                 System.out.printf("T: %3d > %7s changed from %s to %s%n", Clock.Time(), getIdFoodTube(), current_state, nextState);
@@ -280,18 +279,16 @@ public class Robot {
 		if (tube.weight > INDIVIDUAL_MAX_WEIGHT) throw new ItemTooHeavyException();
 	}
 
-	public void attachArms() {
-        armsAttached = true;
-    }
 
-    public void attachFoodTube() {
-        armsAttached = false;
-    }
 
-    public void addToFoodTube(FoodItem food) {
-        if(foodTube.size() == 0 )   {
-            heatingStarted = Clock.Time();
-        }
+
+
+    public void addToFoodTube(FoodItem food) throws ItemTooHeavyException {
+        if (food.weight > INDIVIDUAL_MAX_WEIGHT) throw new ItemTooHeavyException();
+        this.isMailMode = false;
+
+        heatingStarted = Clock.Time();
+
         foodTube.push(food);
     }
 

@@ -6,6 +6,10 @@ import simulation.Building;
 import simulation.Clock;
 import simulation.IMailDelivery;
 
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Queue;
 import java.util.Stack;
 
 /**
@@ -14,6 +18,11 @@ import java.util.Stack;
 public class Robot {
 
     private boolean armsAttached = true;
+
+    public boolean isArmsAttached() {
+        return armsAttached;
+    }
+
     static public final int INDIVIDUAL_MAX_WEIGHT = 2000;
 
     IMailDelivery delivery;
@@ -34,7 +43,10 @@ public class Robot {
     private int heatingStarted;
 
     private Stack<FoodItem> foodTube = new Stack<>();
-    
+
+    //private static Queue<String>[Building.FLOORS] lockedFloors;
+    //private ArrayList[] lockedFloors = new ArrayList[Building.FLOORS];
+    ArrayList<Queue<String>> lockedFloors = new ArrayList<Queue<String>>(Building.FLOORS);
 
     /**
      * Initiates the robot's location at the start to be at the mailroom
@@ -114,6 +126,7 @@ public class Robot {
                         receivedDispatch = false;
                         deliveryCounter = 0; // reset delivery counter
                         setDestination();
+
                         changeState(RobotState.DELIVERING);
                     }
                     break;
@@ -128,6 +141,7 @@ public class Robot {
                         deliveryItem = null;
                         /** Check if want to return, i.e. if there is no item in the tube*/
                         if(tube == null){
+
                             changeState(RobotState.RETURNING);
                         }
                         else{
@@ -147,6 +161,7 @@ public class Robot {
                     } else if (!armsAttached)   {
                         delivery.deliver(foodTube.pop());
                         if(foodItemsLoaded() == 0)  {
+                            armsAttached = true;
                             changeState(RobotState.RETURNING);
                         } else  {
                             setDestination();
@@ -181,6 +196,11 @@ public class Robot {
 
         } else if (!armsAttached)   {
             destination_floor = foodTube.peek().getDestFloor();
+            lockedFloors.get(destination_floor-1).add(this.id);
+        }
+
+        for (int i = 0; i < Building.FLOORS; i++){
+            System.out.println(lockedFloors.get(i).peek());
         }
     }
 
@@ -237,7 +257,11 @@ public class Robot {
 	public MailItem getTube() {
 		return tube;
 	}
-    
+
+
+	public boolean istubeEmpty()  {
+        return tube == null ? true : false;
+    }
 
 
 	public boolean isEmpty() {

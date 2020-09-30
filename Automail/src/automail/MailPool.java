@@ -84,56 +84,71 @@ public class MailPool {
 
 		ListIterator<Item> j = pool.listIterator();
 
-		// Rules for dispatch
-		if(robot.foodItemsLoaded() == Robot.getFoodTubeCap() &&
-				Clock.Time()-robot.getHeatingStarted() >= 5)	{
-			robot.dispatch();
-			i.remove();
+		if (pool.size() == 0 && !robot.isArmsAttached()) {
 
+			if (Clock.Time() - robot.getHeatingStarted() >= 5) {
+
+				robot.dispatch(); // send the robot off if it has any items to
+				// deliver
+				i.remove();
+			}
 		}
+
 
 
 		if (pool.size() > 0) {
 			try {
-				DeliveryItem item = j.next().deliveryItem;
-				if(item.getItemType().equals("Mail") && robot.foodItemsLoaded() == 0) {
-					robot.attachArms();
-					robot.addToHand((MailItem) item); // hand first as we want higher priority delivered first
-					j.remove();
-					if(j.hasNext())	{
-						DeliveryItem item2 = j.next().deliveryItem;
-						if (pool.size() > 0 && item2.getItemType().equals("Mail")) {
-							robot.addToTube((MailItem) item2);
-							j.remove();
 
+				DeliveryItem item = j.next().deliveryItem;
+				String itemType = item.getItemType();
+				if (itemType.equals("Food") || !robot.isArmsAttached()) {
+
+					if (robot.isArmsAttached()) {
+						robot.attachFoodTube();
+
+					}
+
+					if (itemType.equals("Food") && robot.foodItemsLoaded() < 3) {
+						robot.addToFoodTube((FoodItem)item);
+						j.remove();
+					}
+
+					while (j.hasNext() && robot.foodItemsLoaded() < 3) {
+						DeliveryItem item2 = j.next().deliveryItem;
+						if (item2.getItemType().equals("Food")) {
+							robot.addToFoodTube((FoodItem) item2);
+							j.remove();
+						}
+					}
+
+					if (Clock.Time() - robot.getHeatingStarted() >= 5) {
+						robot.dispatch(); // send the robot off if it has any items to
+						// deliver
+						i.remove();
+					}
+
+				} else if (robot.isArmsAttached()) {
+					assert (robot.isEmpty());
+					robot.addToHand((MailItem) item);
+					j.remove();
+
+					while (j.hasNext() && robot.istubeEmpty()) {
+						DeliveryItem item2 = j.next().deliveryItem;
+						if (!(item2.getItemType().equals("Food"))) {
+							robot.addToTube((MailItem)j.previous().deliveryItem);
+							j.remove();
 						}
 					}
 					robot.dispatch(); // send the robot off if it has any items to deliver
-
-					i.remove();       // remove from mailPool queue
-				}	else if (item.getItemType().equals("Food") && robot.foodItemsLoaded() < Robot.getFoodTubeCap()) {
-					robot.attachFoodTube();
-
-					robot.addToFoodTube((FoodItem)item);
-					j.remove();
-
-					while (robot.foodItemsLoaded() < Robot.getFoodTubeCap())	{
-						DeliveryItem item3 = j.next().deliveryItem;
-						if(item3.getItemType().equals("Food"))	{
-							robot.addToFoodTube((FoodItem) item3);
-							j.remove();
-						}
-					}
-
-
+					i.remove();
 				}
-
 
 
 			} catch (Exception e) {
 	            throw e; 
 	        } 
 		}
+
 
 
 	}

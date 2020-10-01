@@ -40,6 +40,8 @@ public class Robot {
 
     private Stack<FoodItem> foodTube = new Stack<>();
 
+    private static int timesFoodTubeAttached = 0;
+
 
 
     /**
@@ -89,6 +91,8 @@ public class Robot {
                         }
 
                     } else if (!isMailMode)    {
+                        isMailMode = true;
+
                         while(!foodTube.isEmpty()) {
                             FoodItem food = foodTube.pop();
                             mailPool.addToPool(food);
@@ -196,11 +200,6 @@ public class Robot {
 
         }
 
-
-
-
-
-
     }
 
     /**
@@ -280,16 +279,33 @@ public class Robot {
 	}
 
 
-
+    private static void foodTubeAttachedCount()   {
+        timesFoodTubeAttached++;
+    }
 
 
     public void addToFoodTube(FoodItem food) throws ItemTooHeavyException {
         if (food.weight > INDIVIDUAL_MAX_WEIGHT) throw new ItemTooHeavyException();
-        this.isMailMode = false;
+
+
+
+
+        if(isMailMode == true)    {
+            foodTubeAttachedCount();
+            this.isMailMode = false;
+        }
+
+
+
+
 
         heatingStarted = Clock.Time();
 
         foodTube.push(food);
+    }
+
+    public static int getTimesFoodTubeAttached() {
+        return timesFoodTubeAttached;
     }
 
     public int getHeatingStarted()  {

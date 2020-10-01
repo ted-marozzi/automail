@@ -1,6 +1,6 @@
 package simulation;
 
-import automail.DeliveryItem;
+import automail.*;
 import exceptions.ExcessiveDeliveryException;
 import exceptions.ItemTooHeavyException;
 import exceptions.MailAlreadyDeliveredException;
@@ -10,10 +10,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import automail.Automail;
-import automail.MailItem;
-import automail.MailPool;
 import static java.lang.System.out;
 
 
@@ -188,6 +187,23 @@ public class Simulation {
         System.out.println("T: "+Clock.Time()+" | Simulation complete!");
         System.out.println("Final Delivery time: "+Clock.Time());
         System.out.printf("Delay: %.2f%n", total_delay);
+
+		ArrayList<MailItem> mailItems = (ArrayList) MAIL_DELIVERED
+				.stream()
+				.filter(mail -> mail.getItemType().equals("Mail")).collect(Collectors.toList());
+
+		ArrayList<FoodItem> foodItems = (ArrayList) MAIL_DELIVERED
+				.stream()
+				.filter(mail -> mail.getItemType().equals("Food")).collect(Collectors.toList());
+
+
+		System.out.println("Mail Items Delivered: " + mailItems.size());
+		System.out.println("Food Items Delivered: " + foodItems.size());
+		System.out.println("Mail Items Weight: " + mailItems.stream().mapToDouble(mail -> mail.getWeight()).sum());
+		System.out.println("Food Items Weight: " + foodItems.stream().mapToDouble(food -> food.getWeight()).sum());
+		System.out.println("Food Tube Attached: " + Robot.getTimesFoodTubeAttached() + " times");
+
+
     }
 
 

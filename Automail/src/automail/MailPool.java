@@ -81,15 +81,22 @@ public class MailPool {
 	private void loadItem(ListIterator<Robot> i) throws ItemTooHeavyException {
 		Robot robot = i.next();
 		assert(robot.isEmpty());
-		Boolean itemAccepted = false;
+		Boolean itemAccepted;
 		ListIterator<Item> j = pool.listIterator();
 
 		if (pool.size() > 0) {
 			try {
-				while(j.hasNext())	{
+				while(j.hasNext() && !robot.isReceivedDispatch())	{
 					DeliveryItem item = j.next().deliveryItem;
 					itemAccepted = robot.inspectDeliveryItem(item);
+
+					if(itemAccepted)	{
+						j.remove();
+					}
 				}
+				robot.dispatch();
+				i.remove();
+
 
 			} catch (Exception e) {
 	            throw e; 

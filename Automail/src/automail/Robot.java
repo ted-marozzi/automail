@@ -15,9 +15,9 @@ public class Robot {
 
     private boolean isMailMode = true;
 
-    public boolean isMailMode() {
-        return isMailMode;
-    }
+    private int foodTubeCap = 3;
+
+
 
     static public final int INDIVIDUAL_MAX_WEIGHT = 2000;
 
@@ -29,6 +29,11 @@ public class Robot {
     private int current_floor;
     private int destination_floor;
     private MailPool mailPool;
+
+    public boolean isReceivedDispatch() {
+        return receivedDispatch;
+    }
+
     private boolean receivedDispatch;
     
     private DeliveryItem deliveryItem = null;
@@ -318,47 +323,30 @@ public class Robot {
 
     public boolean inspectDeliveryItem(DeliveryItem item) throws ItemTooHeavyException {
 
-
-
-
-
-
-        if (item.getItemType().equals("Food")) {
-
-
+        if (item.getItemType().equals("Food") && foodItemsLoaded() < foodTubeCap && isEmpty()) {
             addToFoodTube((FoodItem) item);
-            j.remove();
-
-            while (j.hasNext() && robot.foodItemsLoaded() < 3) {
-                DeliveryItem item2 = j.next().deliveryItem;
-                if (item2.getItemType().equals("Food")) {
-                    robot.addToFoodTube((FoodItem) item2);
-                    j.remove();
-                }
+            if(foodItemsLoaded() == foodTubeCap)    {
+                dispatch();
             }
-
-            robot.dispatch(); // send the robot off if it has any items to
-            // deliver
-            i.remove();
-
-
+            return true;
 
         } else if (item.getItemType().equals("Mail")) {
-            assert (robot.isEmpty());
-            robot.addToHand((MailItem) item);
-            j.remove();
-
-            while (j.hasNext() && robot.istubeEmpty()) {
-                DeliveryItem item2 = j.next().deliveryItem;
-                if (item2.getItemType().equals("Mail")) {
-                    robot.addToTube((MailItem)j.previous().deliveryItem);
-                    j.remove();
-                }
+            if(deliveryItem == null)    {
+                addToHand((MailItem) item);
+                return true;
+            } else if (tube == null) {
+                addToTube((MailItem) item);
+                dispatch();
+                return true;
             }
-            robot.dispatch(); // send the robot off if it has any items to deliver
-            i.remove();
+
         }
 
+        return false;
+
+
     }
+
+
 
 }

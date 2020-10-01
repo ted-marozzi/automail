@@ -296,14 +296,10 @@ public class Robot {
 
 
 
-        if(isMailMode == true)    {
+        if(isMailMode)    {
             foodTubeAttachedCount();
             this.isMailMode = false;
         }
-
-
-
-
 
         heatingStarted = Clock.Time();
 
@@ -331,7 +327,7 @@ public class Robot {
             }
             return true;
 
-        } else if (item.getItemType().equals("Mail")) {
+        } else if (item.getItemType().equals("Mail") && foodTube.isEmpty()) {
             if(deliveryItem == null)    {
                 addToHand((MailItem) item);
                 return true;

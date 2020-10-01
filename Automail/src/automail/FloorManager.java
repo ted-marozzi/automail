@@ -44,8 +44,4 @@ public class FloorManager {
         }
         return false;
     }
-
-    public ArrayList<Queue<String>> getLockedFloors() {
-        return lockedFloors;
-    }
 }

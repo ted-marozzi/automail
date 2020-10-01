@@ -15,11 +15,6 @@ public class Robot {
 
     private boolean isMailMode = true;
 
-    private int foodTubeCap = 3;
-
-
-
-    static public final int INDIVIDUAL_MAX_WEIGHT = 2000;
 
     IMailDelivery delivery;
     protected final String id;
@@ -36,21 +31,15 @@ public class Robot {
 
     private boolean receivedDispatch;
     
-    private DeliveryItem deliveryItem = null;
-    private MailItem tube = null;
+
     
     private int deliveryCounter;
 
-    private int heatingStarted;
-
-    private Stack<FoodItem> foodTube = new Stack<>();
-
-    private static int timesFoodTubeAttached = 0;
-
-    private static RobotStatistics stats;
 
 
-
+    private DeliveryAttachment currentDeliveryAttachment = null;
+    private FoodAttachment foodAttachment;
+    private MailAttachment mailAttachment;
 
 
     /**
@@ -62,14 +51,16 @@ public class Robot {
      */
     public Robot(IMailDelivery delivery, MailPool mailPool, int number){
     	this.id = "R" + number;
-        // current_state = RobotState.WAITING;
+
     	current_state = RobotState.RETURNING;
         current_floor = Building.MAILROOM_LOCATION;
         this.delivery = delivery;
         this.mailPool = mailPool;
         this.receivedDispatch = false;
         this.deliveryCounter = 0;
-
+        foodAttachment = new FoodAttachment();
+        mailAttachment = new MailAttachment();
+        currentDeliveryAttachment = mailAttachment;
     }
     
     /**
@@ -77,6 +68,11 @@ public class Robot {
      */
     public void dispatch() {
     	receivedDispatch = true;
+    }
+
+
+    public boolean isEmpty()   {
+        return currentDeliveryAttachment.isEmpty();
     }
 
 
@@ -91,28 +87,13 @@ public class Robot {
     		case RETURNING:
     			/** If its current position is at the mailroom, then the robot should change state */
                 if(current_floor == Building.MAILROOM_LOCATION){
-                    if(isMailMode && tube !=null) {
-
-
-                        mailPool.addToPool(tube);
-                        System.out.printf("T: %3d > old addToPool [%s]%n", Clock.Time(), tube.toString());
-                        tube = null;
-                        deliveryCounter = 0;
-
-
-                    } else if (!isMailMode)    {
-                        isMailMode = true;
-
-                        while(!foodTube.isEmpty()) {
-                            FoodItem food = foodTube.pop();
-                            mailPool.addToPool(food);
-                            System.out.printf("T: %3d > old addToPool [%s]%n", Clock.Time(), food.toString());
-                            deliveryCounter = 0;
-                        }
-                    }
+                    currentDeliveryAttachment.empty(this.mailPool);
+                    
+                    deliveryCounter = 0;
                     /** Tell the sorter the robot is ready */
                     mailPool.registerWaiting(this);
                     changeState(RobotState.WAITING);
+                    
                 } else {
                 	/** If the robot is not at the mailroom floor yet, then move towards it! */
                     moveTowards(Building.MAILROOM_LOCATION);
@@ -120,68 +101,33 @@ public class Robot {
                 }
     		case WAITING:
                 /** If the StorageTube is ready and the Robot is waiting in the mailroom then start the delivery */
-                if(isMailMode)    {
-                    if(!isEmpty() && receivedDispatch){
-                        receivedDispatch = false;
-                        deliveryCounter = 0; // reset delivery counter
-                        setDestination();
-                        changeState(RobotState.DELIVERING);
-                    }
-                    break;
-
-                } else if (!isMailMode)   {
-                    if(!foodTube.isEmpty() && receivedDispatch && Clock.Time() - heatingStarted >= 5){
-                        receivedDispatch = false;
-                        deliveryCounter = 0; // reset delivery counter
-                        setDestination();
-
-                        changeState(RobotState.DELIVERING);
-                    }
-                    break;
+                if(receivedDispatch && currentDeliveryAttachment.canStartDelivery())   {
+                    receivedDispatch = false;
+                    deliveryCounter = 0; // reset delivery counter
+                    setDestination();
+                    changeState(Robot.RobotState.DELIVERING);
                 }
+                break;
 
     		case DELIVERING:
-    			if(current_floor == destination_floor && (this.id.equals(FloorManager.getInstance().getLockedFloors().get(current_floor-1).peek()) || FloorManager.getInstance().getLockedFloors().get(current_floor-1).peek() == null)) { // If already here drop off either way
+    		    String floorLocked = FloorManager.getInstance().getLockedFloors().get(current_floor-1).peek();
+    			if(current_floor == destination_floor && (this.id.equals(floorLocked) || floorLocked == null) ) { // If already here drop off either way
                     /** Delivery complete, report this to the simulator! */
+                    delivery.deliver(currentDeliveryAttachment.deliverItem());
 
-                    if(isMailMode)   {
-                        delivery.deliver(deliveryItem);
-                        deliveryItem = null;
-                        /** Check if want to return, i.e. if there is no item in the tube*/
-                        if(tube == null){
+                    deliveryCounter++;
+                    if(deliveryCounter > currentDeliveryAttachment.getCapacity()){  // Implies a simulation bug
+                        throw new ExcessiveDeliveryException();
+                    }
 
-                            changeState(RobotState.RETURNING);
-                        }
-                        else{
-                            /** If there is another item, set the robot's route to the location to deliver the item */
-                            deliveryItem = tube;
-                            tube = null;
-                            setDestination();
-                            changeState(RobotState.DELIVERING);
-                        }
-
-                        deliveryCounter++;
-                        if(deliveryCounter > 2){  // Implies a simulation bug
-                            throw new ExcessiveDeliveryException();
-                        }
-
-
-                    } else if (!isMailMode)   {
-                        delivery.deliver(foodTube.pop());
-                        FloorManager.getInstance().getLockedFloors().get(destination_floor-1).remove();
-                        if(foodItemsLoaded() == 0)  {
-                            isMailMode = true;
-                            changeState(RobotState.RETURNING);
-                        } else  {
-                            setDestination();
-                            changeState(RobotState.DELIVERING);
-                        }
-
-                        deliveryCounter++;
-                        if(deliveryCounter > 3){  // Implies a simulation bug
-                            throw new ExcessiveDeliveryException();
-                        }
-
+                    if(currentDeliveryAttachment.isEmpty()) {
+                        changeState(RobotState.RETURNING);
+                        currentDeliveryAttachment = mailAttachment;
+                    }
+                    else
+                    {
+                        setDestination();
+                        changeState(RobotState.DELIVERING);
                     }
 
     			} else {
@@ -199,15 +145,10 @@ public class Robot {
      */
     private void setDestination() {
 
-        if(isMailMode)    {
-            /** Set the destination floor */
-            destination_floor = deliveryItem.getDestFloor();
+        destination_floor = currentDeliveryAttachment.nextToDeliver().destinationFloor;
 
-        } else if (!isMailMode)   {
-            destination_floor = foodTube.peek().getDestFloor();
+        if(currentDeliveryAttachment.equals(foodAttachment))    {
             FloorManager.getInstance().lockFloor(destination_floor, this.id);
-
-
         }
 
     }
@@ -224,116 +165,50 @@ public class Robot {
         }
     }
     
-    private String getIdTube() {
-    	return String.format("%s(%1d)", this.id, (tube == null ? 0 : 1));
-    }
 
-    private String getIdFoodTube() {
-        return String.format("%s(%1d)", this.id, foodTube.size());
-    }
     
     /**
      * Prints out the change in state
      * @param nextState the state to which the robot is transitioning
      */
     private void changeState(RobotState nextState){
-        if(this.isMailMode)
-        {
-            assert(!(deliveryItem == null && tube != null));
-            if (current_state != nextState) {
-                System.out.printf("T: %3d > %7s changed from %s to %s%n", Clock.Time(), getIdTube(), current_state, nextState);
-            }
-            current_state = nextState;
-            if(nextState == RobotState.DELIVERING){
-                System.out.printf("T: %3d > %7s-> [%s]%n", Clock.Time(), getIdTube(), deliveryItem.toString());
-            }
-
-        } else if(!this.isMailMode)   {
-
-            if (current_state != nextState) {
-                System.out.printf("T: %3d > %7s changed from %s to %s%n", Clock.Time(), getIdFoodTube(), current_state, nextState);
-            }
-            current_state = nextState;
-            if(nextState == RobotState.DELIVERING){
-                System.out.printf("T: %3d > %7s-> [%s]%n", Clock.Time(), getIdFoodTube(), foodTube.peek().toString());
-            }
-
+        if (current_state != nextState) {
+            System.out.printf("T: %3d > %7s changed from %s to %s%n", Clock.Time(), currentDeliveryAttachment.getTubeId(this.id), current_state, nextState);
         }
-
-    }
-
-	public MailItem getTube() {
-		return tube;
-	}
-
-
-	public boolean istubeEmpty()  {
-        return tube == null ? true : false;
-    }
-
-
-	public boolean isEmpty() {
-		return (deliveryItem == null && tube == null);
-	}
-
-	public void addToHand(MailItem mailItem) throws ItemTooHeavyException {
-		assert(deliveryItem == null);
-		deliveryItem = mailItem;
-		isMailMode = true;
-		if (deliveryItem.weight > INDIVIDUAL_MAX_WEIGHT) throw new ItemTooHeavyException();
-	}
-
-	public void addToTube(MailItem mailItem) throws ItemTooHeavyException {
-		assert(tube == null);
-		tube = mailItem;
-		if (tube.weight > INDIVIDUAL_MAX_WEIGHT) throw new ItemTooHeavyException();
-	}
-
-
-
-
-
-    private void addToFoodTube(FoodItem food) throws ItemTooHeavyException {
-        if (food.weight > INDIVIDUAL_MAX_WEIGHT) throw new ItemTooHeavyException();
-
-
-
-
-        if(isMailMode)    {
-            stats.foodTubeAttachedCount();
-            this.isMailMode = false;
+        current_state = nextState;
+        if(nextState == RobotState.DELIVERING){
+            System.out.printf("T: %3d > %7s-> [%s]%n", Clock.Time(), currentDeliveryAttachment.getTubeId(this.id), currentDeliveryAttachment.nextToDeliver().toString());
         }
-
-        heatingStarted = Clock.Time();
-
-        foodTube.push(food);
     }
 
-
-
-
-
-    public int foodItemsLoaded()    {
-        return foodTube.size();
-    }
 
 
 
     public boolean inspectDeliveryItem(DeliveryItem item) throws ItemTooHeavyException {
 
-        if (item.getItemType().equals("Food") && foodItemsLoaded() < foodTubeCap && isEmpty()) {
-            addToFoodTube((FoodItem) item);
-            if(foodItemsLoaded() == foodTubeCap)    {
+        if (item.getItemType().equals("Food")
+                && foodAttachment.foodItemsLoaded() < foodAttachment.getCapacity()
+                && mailAttachment.isEmpty()) {
+
+            foodAttachment.addToFoodTube((FoodItem) item);
+
+            if(currentDeliveryAttachment.equals(mailAttachment))    {
+                RobotStatistics.foodTubeAttachedCount();
+                this.currentDeliveryAttachment = foodAttachment;
+            }
+
+            if(foodAttachment.foodItemsLoaded() == foodAttachment.getCapacity())    {
                 dispatch();
             }
             return true;
 
-        } else if (item.getItemType().equals("Mail") && foodTube.isEmpty()) {
-            if(deliveryItem == null)    {
-                addToHand((MailItem) item);
+        } else if (item.getItemType().equals("Mail") && foodAttachment.isEmpty()) {
+            if(mailAttachment.nextToDeliver() == null)    {
+                mailAttachment.addToHand((MailItem) item);
+                currentDeliveryAttachment = mailAttachment;
                 return true;
-            } else if (tube == null) {
-                addToTube((MailItem) item);
+            } else if (mailAttachment.getTube() == null) {
+                mailAttachment.addToTube((MailItem) item);
                 dispatch();
                 return true;
             }

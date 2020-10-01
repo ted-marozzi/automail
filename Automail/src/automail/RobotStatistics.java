@@ -9,7 +9,9 @@ public class RobotStatistics {
     }
 
     public static void foodTubeAttachedCount()   {
+
         timesFoodTubeAttached++;
+        System.out.println("### Times food tube attacked: " + timesFoodTubeAttached);
     }
 
 

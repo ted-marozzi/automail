@@ -99,8 +99,7 @@ public class Robot {
                 break;
 
     		case DELIVERING:
-    		    String floorLocked = FloorManager.getInstance().getLockedFloors().get(current_floor-1).peek();
-    			if(current_floor == destination_floor && (this.id.equals(floorLocked) || floorLocked == null) ) { // If already here drop off either way
+    		    if(current_floor == destination_floor && FloorManager.getInstance().checkFloor(current_floor, this.id)) {
                     /** Delivery complete, report this to the simulator! */
                     delivery.deliver(currentDeliveryAttachment.deliverItem());
 

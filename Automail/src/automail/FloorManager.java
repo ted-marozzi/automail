@@ -18,7 +18,6 @@ public class FloorManager {
         {
             instance = new FloorManager();
         }
-
         return instance;
     }
 
@@ -28,17 +27,22 @@ public class FloorManager {
         }
     }
 
-
     public void lockFloor(int floorIndex, String id) {
-
         lockedFloors.get(floorIndex-1).add(id);
-        System.out.println("Robot " + lockedFloors.get(floorIndex-1).peek() + " is locking floor " + (floorIndex));
+        System.out.println("Robot " + id + " is locking floor " + floorIndex);
     }
 
-    public void printFloors()   {
-        for(int i = 0; i< Building.FLOORS; i++) {
-            System.out.println(lockedFloors.get(i).peek());
+    public void releaseFloor(int floorIndex) {
+        lockedFloors.get(floorIndex-1).poll();
+        System.out.println("Floor " + floorIndex + " released");
+    }
+
+    public boolean checkFloor(int floorIndex, String id) {
+        String floorLocked = lockedFloors.get(floorIndex-1).peek();
+        if (id.equals(floorLocked) || floorLocked == null) {
+            return true;
         }
+        return false;
     }
 
     public ArrayList<Queue<String>> getLockedFloors() {

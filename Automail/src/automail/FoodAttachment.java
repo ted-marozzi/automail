@@ -54,10 +54,8 @@ public class FoodAttachment implements DeliveryAttachment {
 
     @Override
     public DeliveryItem deliverItem() {
-        FloorManager.getInstance().getLockedFloors().get(nextToDeliver().destinationFloor-1).poll();
-
+        FloorManager.getInstance().releaseFloor(nextToDeliver().destinationFloor);
         return foodTube.pop();
-
     }
 
     @Override

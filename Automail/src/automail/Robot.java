@@ -284,7 +284,7 @@ public class Robot {
     }
 
 
-    public void addToFoodTube(FoodItem food) throws ItemTooHeavyException {
+    private void addToFoodTube(FoodItem food) throws ItemTooHeavyException {
         if (food.weight > INDIVIDUAL_MAX_WEIGHT) throw new ItemTooHeavyException();
 
 
@@ -308,16 +308,57 @@ public class Robot {
         return timesFoodTubeAttached;
     }
 
-    public int getHeatingStarted()  {
-        return heatingStarted;
-    }
+
 
     public int foodItemsLoaded()    {
         return foodTube.size();
     }
 
-    public static int getFoodTubeCap()    {
-        return 3;
+
+
+    public boolean inspectDeliveryItem(DeliveryItem item) throws ItemTooHeavyException {
+
+
+
+
+
+
+        if (item.getItemType().equals("Food")) {
+
+
+            addToFoodTube((FoodItem) item);
+            j.remove();
+
+            while (j.hasNext() && robot.foodItemsLoaded() < 3) {
+                DeliveryItem item2 = j.next().deliveryItem;
+                if (item2.getItemType().equals("Food")) {
+                    robot.addToFoodTube((FoodItem) item2);
+                    j.remove();
+                }
+            }
+
+            robot.dispatch(); // send the robot off if it has any items to
+            // deliver
+            i.remove();
+
+
+
+        } else if (item.getItemType().equals("Mail")) {
+            assert (robot.isEmpty());
+            robot.addToHand((MailItem) item);
+            j.remove();
+
+            while (j.hasNext() && robot.istubeEmpty()) {
+                DeliveryItem item2 = j.next().deliveryItem;
+                if (item2.getItemType().equals("Mail")) {
+                    robot.addToTube((MailItem)j.previous().deliveryItem);
+                    j.remove();
+                }
+            }
+            robot.dispatch(); // send the robot off if it has any items to deliver
+            i.remove();
+        }
+
     }
 
 }

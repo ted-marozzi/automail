@@ -81,50 +81,15 @@ public class MailPool {
 	private void loadItem(ListIterator<Robot> i) throws ItemTooHeavyException {
 		Robot robot = i.next();
 		assert(robot.isEmpty());
-
+		Boolean itemAccepted = false;
 		ListIterator<Item> j = pool.listIterator();
 
 		if (pool.size() > 0) {
 			try {
-
-				DeliveryItem item = j.next().deliveryItem;
-
-				if (item.getItemType().equals("Food")) {
-
-
-					robot.addToFoodTube((FoodItem) item);
-					j.remove();
-
-					while (j.hasNext() && robot.foodItemsLoaded() < 3) {
-						DeliveryItem item2 = j.next().deliveryItem;
-						if (item2.getItemType().equals("Food")) {
-							robot.addToFoodTube((FoodItem) item2);
-							j.remove();
-						}
-					}
-
-					robot.dispatch(); // send the robot off if it has any items to
-					// deliver
-					i.remove();
-
-
-
-				} else if (item.getItemType().equals("Mail")) {
-					assert (robot.isEmpty());
-					robot.addToHand((MailItem) item);
-					j.remove();
-
-					while (j.hasNext() && robot.istubeEmpty()) {
-						DeliveryItem item2 = j.next().deliveryItem;
-						if (item2.getItemType().equals("Mail")) {
-							robot.addToTube((MailItem)j.previous().deliveryItem);
-							j.remove();
-						}
-					}
-					robot.dispatch(); // send the robot off if it has any items to deliver
-					i.remove();
+				while(j.hasNext())	{
+					DeliveryItem item = j.next().deliveryItem;
+					itemAccepted = robot.inspectDeliveryItem(item);
 				}
-
 
 			} catch (Exception e) {
 	            throw e; 

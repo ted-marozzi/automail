@@ -73,6 +73,7 @@ public class Simulation {
         /* Instantiate MailPool and Automail */
      	MailPool mailPool = new MailPool();
         Automail automail = new Automail(mailPool, new ReportDelivery(), NUM_ROBOTS);
+
         MailGenerator mailGenerator = new MailGenerator(MAIL_TO_CREATE, MAIL_MAX_WEIGHT, mailPool, seedMap);
         
         /** Generate all the mails */
@@ -207,7 +208,7 @@ public class Simulation {
 			System.out.println("Food Items Delivered: " + foodItems.size());
 			System.out.println("Mail Items Weight: " + mailItems.stream().mapToDouble(mail -> mail.getWeight()).sum());
 			System.out.println("Food Items Weight: " + foodItems.stream().mapToDouble(food -> food.getWeight()).sum());
-			System.out.println("Food Tube Attached: " + Robot.getTimesFoodTubeAttached() + " times");
+			System.out.println("Food Tube Attached: " + RobotStatistics.getTimesFoodTubeAttached() + " times");
 
 		}
 

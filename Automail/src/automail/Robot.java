@@ -47,6 +47,10 @@ public class Robot {
 
     private static int timesFoodTubeAttached = 0;
 
+    private static RobotStatistics stats;
+
+
+
 
 
     /**
@@ -65,6 +69,7 @@ public class Robot {
         this.mailPool = mailPool;
         this.receivedDispatch = false;
         this.deliveryCounter = 0;
+
     }
     
     /**
@@ -86,14 +91,14 @@ public class Robot {
     		case RETURNING:
     			/** If its current position is at the mailroom, then the robot should change state */
                 if(current_floor == Building.MAILROOM_LOCATION){
-                    if(isMailMode) {
+                    if(isMailMode && tube !=null) {
 
-                        if (tube != null) {
-                            mailPool.addToPool(tube);
-                            System.out.printf("T: %3d > old addToPool [%s]%n", Clock.Time(), tube.toString());
-                            tube = null;
-                            deliveryCounter = 0;
-                        }
+
+                        mailPool.addToPool(tube);
+                        System.out.printf("T: %3d > old addToPool [%s]%n", Clock.Time(), tube.toString());
+                        tube = null;
+                        deliveryCounter = 0;
+
 
                     } else if (!isMailMode)    {
                         isMailMode = true;
@@ -136,7 +141,7 @@ public class Robot {
                 }
 
     		case DELIVERING:
-    			if(current_floor == destination_floor && (FloorManager.getInstance().getLockedFloors().get(current_floor-1).peek() == this.id || FloorManager.getInstance().getLockedFloors().get(current_floor-1).peek() == null)) { // If already here drop off either way
+    			if(current_floor == destination_floor && (this.id.equals(FloorManager.getInstance().getLockedFloors().get(current_floor-1).peek()) || FloorManager.getInstance().getLockedFloors().get(current_floor-1).peek() == null)) { // If already here drop off either way
                     /** Delivery complete, report this to the simulator! */
 
                     if(isMailMode)   {
@@ -285,9 +290,7 @@ public class Robot {
 	}
 
 
-    private static void foodTubeAttachedCount()   {
-        timesFoodTubeAttached++;
-    }
+
 
 
     private void addToFoodTube(FoodItem food) throws ItemTooHeavyException {
@@ -297,7 +300,7 @@ public class Robot {
 
 
         if(isMailMode)    {
-            foodTubeAttachedCount();
+            stats.foodTubeAttachedCount();
             this.isMailMode = false;
         }
 
@@ -306,9 +309,7 @@ public class Robot {
         foodTube.push(food);
     }
 
-    public static int getTimesFoodTubeAttached() {
-        return timesFoodTubeAttached;
-    }
+
 
 
 
@@ -338,10 +339,7 @@ public class Robot {
             }
 
         }
-
         return false;
-
-
     }
 
 

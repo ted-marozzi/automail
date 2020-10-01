@@ -12,10 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.lang.System.out;
-
 
 /**
  * This class simulates the behaviour of AutoMail
@@ -195,12 +191,12 @@ public class Simulation {
 
 			List<DeliveryItem> mailItems = MAIL_DELIVERED
 					.stream()
-					.filter(mail -> mail.getItemType().equals("Mail"))
+					.filter(deliveryItem -> deliveryItem instanceof MailItem)
 					.collect(Collectors.toList());
 
 			List<DeliveryItem> foodItems = MAIL_DELIVERED
 					.stream()
-					.filter(mail -> mail.getItemType().equals("Food"))
+					.filter(deliveryItem -> deliveryItem instanceof FoodItem)
 					.collect(Collectors.toList());
 
 

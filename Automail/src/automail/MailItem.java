@@ -16,9 +16,11 @@ public class MailItem extends DeliveryItem {
      * @param weight the weight of this mail item
      */
     public MailItem(int dest_floor, int arrival_time, int weight){
-        super(dest_floor, arrival_time, weight, "Mail");
+        super(dest_floor, arrival_time, weight);
     }
 
-
-
+    @Override
+    public String toString() {
+        return String.format("Mail Item:: ID: %6s | Arrival: %4d | Destination: %2d | Weight: %4d", id, arrivalTime, destinationFloor, weight);
+    }
 }

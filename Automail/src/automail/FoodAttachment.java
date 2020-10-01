@@ -7,7 +7,7 @@ import java.util.Stack;
 
 
 
-public class FoodAttachment extends DeliveryAttachment {
+public class FoodAttachment implements DeliveryAttachment {
 
     private int capacity = 3;
     private Stack<FoodItem> foodTube = new Stack<>();

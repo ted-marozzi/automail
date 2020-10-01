@@ -58,18 +58,17 @@ public class MailGenerator {
         int priorityLevel = generatePriorityLevel();
         int arrivalTime = generateArrivalTime();
         int weight = generateWeight();
-        String itemType = "Mail";
+
         double percentageFood = 0.5;
-        if(Simulation.getDELIVER_FOOD() && random.nextFloat() < percentageFood)
-            itemType = "Food";
+
             // Check if arrival time has a priority mail
         if(	(random.nextInt(6) > 0) ||  // Skew towards non priority mail
         	(allMail.containsKey(arrivalTime) &&
         	allMail.get(arrivalTime).stream().anyMatch(e -> PriorityMailItem.class.isInstance(e))))
         {
-            if(itemType.equals("Food"))
+            if(Simulation.getDELIVER_FOOD() && random.nextFloat() < percentageFood)
                 newItem = new FoodItem(destinationFloor,arrivalTime,weight);
-            else if (itemType.equals("Mail"))
+            else
                 newItem = new MailItem(destinationFloor,arrivalTime,weight);
 
         } else {

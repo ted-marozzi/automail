@@ -1,20 +1,20 @@
 package automail;
 
-public abstract class DeliveryAttachment {
-    static public final int INDIVIDUAL_MAX_WEIGHT = 2000;
-    private int capacity;
+public interface DeliveryAttachment {
+    int INDIVIDUAL_MAX_WEIGHT = 2000;
 
-    public abstract void empty(MailPool mailPool);
 
-    public abstract boolean canStartDelivery();
+    void empty(MailPool mailPool);
 
-    public abstract DeliveryItem deliverItem();
+    boolean canStartDelivery();
 
-    public abstract int getCapacity();
+    DeliveryItem deliverItem();
 
-    public abstract boolean isEmpty();
+    int getCapacity();
 
-    public abstract DeliveryItem nextToDeliver();
+    boolean isEmpty();
 
-    public abstract String getTubeId(String id);
+    DeliveryItem nextToDeliver();
+
+    String getTubeId(String id);
 }

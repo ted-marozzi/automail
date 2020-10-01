@@ -6,7 +6,6 @@ import simulation.Building;
 import simulation.Clock;
 import simulation.IMailDelivery;
 
-import java.util.*;
 
 /**
  * The robot delivers mail!
@@ -14,8 +13,6 @@ import java.util.*;
 public class Robot {
 
     private boolean isMailMode = true;
-
-
     IMailDelivery delivery;
     protected final String id;
     /** Possible states the robot can be in */
@@ -24,19 +21,11 @@ public class Robot {
     private int current_floor;
     private int destination_floor;
     private MailPool mailPool;
-
     public boolean isReceivedDispatch() {
         return receivedDispatch;
     }
-
     private boolean receivedDispatch;
-    
-
-    
     private int deliveryCounter;
-
-
-
     private DeliveryAttachment currentDeliveryAttachment = null;
     private FoodAttachment foodAttachment;
     private MailAttachment mailAttachment;
@@ -186,7 +175,7 @@ public class Robot {
 
     public boolean inspectDeliveryItem(DeliveryItem item) throws ItemTooHeavyException {
 
-        if (item.getItemType().equals("Food")
+        if (item instanceof FoodItem
                 && foodAttachment.foodItemsLoaded() < foodAttachment.getCapacity()
                 && mailAttachment.isEmpty()) {
 
@@ -202,7 +191,8 @@ public class Robot {
             }
             return true;
 
-        } else if (item.getItemType().equals("Mail") && foodAttachment.isEmpty()) {
+        } else if (item instanceof MailItem && foodAttachment.isEmpty()) {
+
             if(mailAttachment.nextToDeliver() == null)    {
                 mailAttachment.addToHand((MailItem) item);
                 currentDeliveryAttachment = mailAttachment;

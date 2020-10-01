@@ -3,7 +3,7 @@ package automail;
 import exceptions.ItemTooHeavyException;
 import simulation.Clock;
 
-public class  MailAttachment extends DeliveryAttachment {
+public class  MailAttachment implements DeliveryAttachment {
 
     private MailItem deliveryItem = null;
     private MailItem tube = null;

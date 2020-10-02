@@ -236,6 +236,12 @@ public class Robot {
         receivedDispatch = true;
     }
 
+    public void heatFood()  {
+        if(this.currentDeliveryAttachment == foodAttachment)  {
+            foodAttachment.startHeating();
+        }
+    }
+
 
 
 

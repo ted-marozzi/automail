@@ -27,10 +27,13 @@ public class FoodAttachment implements DeliveryAttachment {
             throw new ItemTooHeavyException();
         }
 
-        if(isEmpty())
-            heatingStarted = Clock.Time();
+
 
         foodTube.push(food);
+    }
+
+    public void startHeating()  {
+        heatingStarted = Clock.Time();
     }
 
 

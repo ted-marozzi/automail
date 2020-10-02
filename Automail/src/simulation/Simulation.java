@@ -30,7 +30,7 @@ public class Simulation {
     public static boolean getDELIVER_FOOD()	{
     	return DELIVER_FOOD;
 	}
-    private static ArrayList<DeliveryItem> MAIL_DELIVERED;
+    private static ArrayList<DeliveryItem> DELIVERED;
     private static double total_delay = 0;
 
     public static void main(String[] args) throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException {
@@ -38,7 +38,7 @@ public class Simulation {
     	Properties automailProperties = setUpProperties();
     	
     	//An array list to record mails that have been delivered
-        MAIL_DELIVERED = new ArrayList<DeliveryItem>();
+        DELIVERED = new ArrayList<DeliveryItem>();
                 
         
         
@@ -75,7 +75,7 @@ public class Simulation {
         /** Generate all the mails */
         mailGenerator.generateAllMail();
         // PriorityMailItem priority;  // Not used in this version
-        while(MAIL_DELIVERED.size() != mailGenerator.MAIL_TO_CREATE) {
+        while(DELIVERED.size() != mailGenerator.MAIL_TO_CREATE) {
 			// Given the time, add items to the mail pool
             mailGenerator.addToMailPool();
             try {
@@ -97,9 +97,7 @@ public class Simulation {
     
     static private Properties setUpProperties() throws IOException {
     	Properties automailProperties = new Properties();
-		// Default properties
-		// automailProperties.setProperty("Robots", "Big,Careful,Standard,Weak");
-		
+
 		final String FALSE = "false";
     	automailProperties.setProperty("Robots", "Standard");
     	automailProperties.setProperty("MailPool", "strategies.SimpleMailPool");
@@ -153,9 +151,9 @@ public class Simulation {
     	
     	/** Confirm the delivery and calculate the total score */
     	public void deliver(DeliveryItem deliveryItem){
-    		if(!MAIL_DELIVERED.contains(deliveryItem)){
-    			MAIL_DELIVERED.add(deliveryItem);
-                System.out.printf("T: %3d > Delivered(%4d) [%s]%n", Clock.Time(), MAIL_DELIVERED.size(), deliveryItem.toString());
+    		if(!DELIVERED.contains(deliveryItem)){
+    			DELIVERED.add(deliveryItem);
+                System.out.printf("T: %3d > Delivered(%4d) [%s]%n", Clock.Time(), DELIVERED.size(), deliveryItem.toString());
     			// Calculate delivery score
     			total_delay += calculateDeliveryDelay(deliveryItem);
     		}
@@ -190,21 +188,10 @@ public class Simulation {
         /* Only print theses stats if enabled in automail.properties */
         if(STATISTICS_ENABLED)	{
 
-			List<DeliveryItem> mailItems = MAIL_DELIVERED
-					.stream()
-					.filter(deliveryItem -> deliveryItem instanceof MailItem)
-					.collect(Collectors.toList());
-
-			List<DeliveryItem> foodItems = MAIL_DELIVERED
-					.stream()
-					.filter(deliveryItem -> deliveryItem instanceof FoodItem)
-					.collect(Collectors.toList());
-
-
-			System.out.println("Mail Items Delivered: " + mailItems.size());
-			System.out.println("Food Items Delivered: " + foodItems.size());
-			System.out.println("Mail Items Weight: " + mailItems.stream().mapToDouble(mail -> mail.getWeight()).sum());
-			System.out.println("Food Items Weight: " + foodItems.stream().mapToDouble(food -> food.getWeight()).sum());
+			System.out.println("Mail Items Delivered: " + RobotStatistics.getNumberMailDelivered());
+			System.out.println("Food Items Delivered: " + RobotStatistics.getNumberFoodDelivered());
+			System.out.println("Mail Items Weight: " + RobotStatistics.getTotalMailWeight());
+			System.out.println("Food Items Weight: " + RobotStatistics.getTotalFoodWeight());
 			System.out.println("Food Tube Attached: " + RobotStatistics.getTimesFoodTubeAttached() + " times");
 
 		}

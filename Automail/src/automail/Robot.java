@@ -6,6 +6,9 @@ import simulation.Building;
 import simulation.Clock;
 import simulation.IMailDelivery;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * The robot delivers mail and food!
  */
@@ -96,7 +99,9 @@ public class Robot {
                 /* Ensure that the floor isn't locked due to another robot attempting to deliver food */
                 if (current_floor == destination_floor && FloorManager.checkFloor(current_floor, this.id)) {
                     /* Delivery complete, report this to the simulator! */
-                    delivery.deliver(currentDeliveryAttachment.deliverItem());
+                    DeliveryItem tmp = currentDeliveryAttachment.deliverItem();
+                    delivery.deliver(tmp);
+                    RobotStatistics.itemDelivered(tmp);
                     /* If succesful delivery unlock floor */
                     FloorManager.releaseFloor(this.destination_floor);
 
@@ -230,6 +235,9 @@ public class Robot {
     public void dispatch() {
         receivedDispatch = true;
     }
+
+
+
 
 
 }

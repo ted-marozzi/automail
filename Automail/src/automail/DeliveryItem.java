@@ -10,7 +10,7 @@ public abstract class DeliveryItem {
 
 
     /**
-     * @param destFloor   The floor the package needs to be delivered too
+     * @param destFloor   The floor the delivery needs to be delivered too
      * @param arrivalTime The time the delivery item appears in the mail pool
      * @param weight      The weight of the item to be delivered
      */
@@ -23,46 +23,46 @@ public abstract class DeliveryItem {
 
 
     /**
-     * Represents the destination floor to which the mail is intended to go
+     * Represents the destination floor to which the delivery is intended to go
      */
     protected final int destinationFloor;
     /**
-     * The mail identifier
+     * The delivery identifier
      */
     protected final String id;
     /**
-     * The time the mail item arrived
+     * The time the delivery item arrived
      */
     protected final int arrivalTime;
     /**
-     * The weight in grams of the mail item
+     * The weight in grams of the delivery item
      */
     protected final int weight;
 
 
     /**
-     * @return the destination floor of the mail item
+     * @return the destination floor of the delivery item
      */
     public int getDestFloor() {
         return destinationFloor;
     }
 
     /**
-     * @return the ID of the mail item
+     * @return the ID of the delivery item
      */
     public String getId() {
         return id;
     }
 
     /**
-     * @return the arrival time of the mail item
+     * @return the arrival time of the delivery item
      */
     public int getArrivalTime() {
         return arrivalTime;
     }
 
     /**
-     * @return the weight of the mail item
+     * @return the weight of the delivery item
      */
     public int getWeight() {
         return weight;

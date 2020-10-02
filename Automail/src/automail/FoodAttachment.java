@@ -22,7 +22,10 @@ public class FoodAttachment implements DeliveryAttachment {
      */
     public void addToFoodTube(FoodItem food) throws ItemTooHeavyException {
 
-        if (food.weight > INDIVIDUAL_MAX_WEIGHT) throw new ItemTooHeavyException();
+        if (food.weight > INDIVIDUAL_MAX_WEIGHT)
+        {
+            throw new ItemTooHeavyException();
+        }
 
         if(isEmpty())
             heatingStarted = Clock.Time();

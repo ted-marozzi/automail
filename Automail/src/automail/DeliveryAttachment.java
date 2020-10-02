@@ -1,5 +1,7 @@
 package automail;
 
+import simulation.Simulation;
+
 /**
  * The interface for Robot delivery attachments to carry different items
  */

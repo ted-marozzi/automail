@@ -84,7 +84,10 @@ public class MailAttachment implements DeliveryAttachment {
     public void addToTube(MailItem mailItem) throws ItemTooHeavyException {
         assert (tube == null);
         tube = mailItem;
-        if (tube.weight > INDIVIDUAL_MAX_WEIGHT) throw new ItemTooHeavyException();
+        if (tube.weight > INDIVIDUAL_MAX_WEIGHT)
+        {
+            throw new ItemTooHeavyException();
+        }
     }
 
     /**

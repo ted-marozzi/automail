@@ -101,8 +101,6 @@ public class MailPool {
                 }
                 /* Send the robot off to after being loaded up */
                 robot.dispatch();
-                /* Will begin heating food if robot is a food robot */
-                robot.heatFood();
                 /* Remove from list of eligable robots */
                 i.remove();
                 /* Throws item to heavy exception */

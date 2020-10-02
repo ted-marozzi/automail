@@ -14,6 +14,8 @@ public class FoodAttachment implements DeliveryAttachment {
     private final int capacity = 3;
     private final Stack<FoodItem> foodTube = new Stack<>();
     private int heatingStarted;
+    private boolean isHeatingStarted = false;
+    private static final int TIME_TO_HEAT = 5;
 
 
     /**
@@ -32,9 +34,6 @@ public class FoodAttachment implements DeliveryAttachment {
         foodTube.push(food);
     }
 
-    public void startHeating()  {
-        heatingStarted = Clock.Time();
-    }
 
 
     /**
@@ -65,8 +64,23 @@ public class FoodAttachment implements DeliveryAttachment {
      */
     @Override
     public boolean canStartDelivery() {
-        return !foodTube.isEmpty() && Clock.Time() - heatingStarted >= 5;
 
+        if(!isHeatingStarted)   {
+
+            startHeating();
+        }
+
+        return !foodTube.isEmpty() && Clock.Time() - heatingStarted >= TIME_TO_HEAT;
+
+    }
+
+    private void startHeating() {
+        isHeatingStarted = true;
+        heatingStarted = Clock.Time();
+    }
+
+    public void stopHeating() {
+        isHeatingStarted = false;
     }
 
     /**

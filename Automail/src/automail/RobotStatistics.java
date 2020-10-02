@@ -86,15 +86,24 @@ public class RobotStatistics {
         return getMailItemsDelivered().stream().mapToDouble(mail -> mail.getWeight()).sum();
     }
 
+    /**
+     * @return Number of mail items delivered
+     */
     public static int getNumberMailDelivered() {
         return getMailItemsDelivered().size();
     }
 
 
+    /**
+     * @return Number of food items delivered
+     */
     public static int getNumberFoodDelivered() {
         return getFoodItemsDelivered().size();
     }
 
+    /**
+     * @return Get total items delivered
+     */
     public static int getTotalItemsDelivered()  {
         return ITEMS_DELIVERED.size();
     }

@@ -90,8 +90,11 @@ public class Robot {
                 if (receivedDispatch && currentDeliveryAttachment.canStartDelivery()) {
                     receivedDispatch = false;
                     deliveryCounter = 0; // reset delivery counter
+
+
                     setDestination();
                     changeState(Robot.RobotState.DELIVERING);
+
                 }
                 break;
 
@@ -113,6 +116,7 @@ public class Robot {
                     /* If after the delivery the robot is empty then change status and return to default attachment */
                     if (currentDeliveryAttachment.isEmpty()) {
                         changeState(RobotState.RETURNING);
+                        foodAttachment.stopHeating();
                         currentDeliveryAttachment = mailAttachment;
                     } else {
                         /* Else begin delivering */
@@ -236,10 +240,9 @@ public class Robot {
         receivedDispatch = true;
     }
 
-    public void heatFood()  {
-        if(this.currentDeliveryAttachment == foodAttachment)  {
-            foodAttachment.startHeating();
-        }
+
+    public DeliveryAttachment getCurrentDeliveryAttachment() {
+        return currentDeliveryAttachment;
     }
 
 

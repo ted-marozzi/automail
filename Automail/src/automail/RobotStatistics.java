@@ -68,7 +68,7 @@ public class RobotStatistics {
     /**
      * @return Total weight of the items delivered
      */
-    public double getTotalWeight()  {
+    public static double getTotalWeight()  {
         return ITEMS_DELIVERED.stream().mapToDouble(mail -> mail.getWeight()).sum();
     }
 

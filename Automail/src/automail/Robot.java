@@ -33,8 +33,7 @@ public class Robot {
     private DeliveryAttachment currentDeliveryAttachment;
     private final FoodAttachment foodAttachment;
     private final MailAttachment mailAttachment;
-    /* A floor manager for all the robots to co-operate and avoid contamination */
-    private static FloorManager floorManager = new FloorManager();
+
 
 
     /**

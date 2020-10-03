@@ -29,15 +29,17 @@ public class FloorManager {
      * @param id         the robot id thats locking the floor
      */
     public void lockFloor(int floorIndex, String id) {
+        System.out.println("Robot " + id + " is locking floor " + floorIndex);
         lockedFloors.get(floorIndex - 1).add(id);
-
     }
 
     /**
      * @param floorIndex the floor to release after food is delivered
      */
     public void releaseFloor(int floorIndex) {
-        lockedFloors.get(floorIndex - 1).poll();
+
+        if(lockedFloors.get(floorIndex - 1).poll() != null)
+            System.out.println("Floor " + floorIndex + " is now unlocked");
     }
 
     /**

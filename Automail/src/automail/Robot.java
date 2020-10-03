@@ -23,7 +23,7 @@ public class Robot {
     public RobotState current_state;
     private int current_floor;
     private int destination_floor;
-    private MailPool mailPool;
+    private final MailPool mailPool;
     private boolean receivedDispatch;
     private int deliveryCounter;
     /* Current Delivery Attachment points to either food or mail attachment depending on which it is using at
@@ -31,8 +31,8 @@ public class Robot {
     private DeliveryAttachment currentDeliveryAttachment;
     private final FoodAttachment foodAttachment;
     private final MailAttachment mailAttachment;
-    private RobotStatistics stats;
-    private FloorManager floorManager;
+    private final RobotStatistics stats;
+    private final FloorManager floorManager;
 
 
 
@@ -42,7 +42,7 @@ public class Robot {
      *  @param delivery governs the final delivery
      * @param mailPool is the source of mail items
      * @param number   the robot number
-     * @param floorManager
+     * @param floorManager Ensures no cross contamination when delivering food
      */
     public Robot(IMailDelivery delivery, MailPool mailPool, int number, RobotStatistics stats, FloorManager floorManager) {
         this.id = "R" + number;
@@ -242,9 +242,6 @@ public class Robot {
     }
 
 
-    public DeliveryAttachment getCurrentDeliveryAttachment() {
-        return currentDeliveryAttachment;
-    }
 
 
 

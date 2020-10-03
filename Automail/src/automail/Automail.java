@@ -12,7 +12,7 @@ public class Automail {
     public Robot[] robots;
     /* The mailPool in automail */
     public MailPool mailPool;
-    private RobotStatistics stats;
+    private final RobotStatistics stats;
 
 
 

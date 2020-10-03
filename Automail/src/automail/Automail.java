@@ -12,6 +12,8 @@ public class Automail {
     public Robot[] robots;
     /* The mailPool in automail */
     public MailPool mailPool;
+    private RobotStatistics stats;
+
 
 
     /**
@@ -20,13 +22,19 @@ public class Automail {
      * @param numRobots The number of robots to generate
      */
     public Automail(MailPool mailPool, IMailDelivery delivery, int numRobots) {
+        stats = new RobotStatistics();
+        FloorManager floorManager = new FloorManager();
+
         /* Initialize the MailPool */
         this.mailPool = mailPool;
 
         /* Initialize robots */
         robots = new Robot[numRobots];
-        for (int i = 0; i < numRobots; i++) robots[i] = new Robot(delivery, mailPool, i);
+        for (int i = 0; i < numRobots; i++) robots[i] = new Robot(delivery, mailPool, i, stats, floorManager);
     }
 
 
+    public RobotStatistics getStats() {
+        return stats;
+    }
 }

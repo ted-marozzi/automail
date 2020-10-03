@@ -92,7 +92,7 @@ public class Simulation {
 			}
             Clock.Tick();
         }
-        printResults();
+        printResults(automail.getStats());
     }
     
     static private Properties setUpProperties() throws IOException {
@@ -179,7 +179,7 @@ public class Simulation {
         return Math.pow(Clock.Time() - deliveryItem.getArrivalTime(),penalty)*(1+Math.sqrt(priority_weight));
     }
 
-    public static void printResults(){
+    public static void printResults(RobotStatistics stats){
         System.out.println("T: "+Clock.Time()+" | Simulation complete!");
         System.out.println("Final Delivery time: "+Clock.Time());
         System.out.printf("Delay: %.2f%n", total_delay);
@@ -188,11 +188,11 @@ public class Simulation {
         /* Only print theses stats if enabled in automail.properties */
         if(STATISTICS_ENABLED)	{
 
-			System.out.println("Mail Items Delivered: " + RobotStatistics.getNumberMailDelivered());
-			System.out.println("Food Items Delivered: " + RobotStatistics.getNumberFoodDelivered());
-			System.out.println("Mail Items Weight: " + RobotStatistics.getTotalMailWeight());
-			System.out.println("Food Items Weight: " + RobotStatistics.getTotalFoodWeight());
-			System.out.println("Food Tube Attached: " + RobotStatistics.getTimesFoodTubeAttached() + " times");
+			System.out.println("Mail Items Delivered: " + stats.getNumberMailDelivered());
+			System.out.println("Food Items Delivered: " + stats.getNumberFoodDelivered());
+			System.out.println("Mail Items Weight: " + stats.getTotalMailWeight());
+			System.out.println("Food Items Weight: " + stats.getTotalFoodWeight());
+			System.out.println("Food Tube Attached: " + stats.getTimesFoodTubeAttached() + " times");
 
 		}
 

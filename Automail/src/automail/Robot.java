@@ -6,8 +6,6 @@ import simulation.Building;
 import simulation.Clock;
 import simulation.IMailDelivery;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The robot delivers mail and food!
@@ -33,18 +31,20 @@ public class Robot {
     private DeliveryAttachment currentDeliveryAttachment;
     private final FoodAttachment foodAttachment;
     private final MailAttachment mailAttachment;
+    private RobotStatistics stats;
+    private FloorManager floorManager;
 
 
 
     /**
      * Initiates the robot's location at the start to be at the mailroom
      * also set it to be waiting for mail.
-     *
-     * @param delivery governs the final delivery
+     *  @param delivery governs the final delivery
      * @param mailPool is the source of mail items
      * @param number   the robot number
+     * @param floorManager
      */
-    public Robot(IMailDelivery delivery, MailPool mailPool, int number) {
+    public Robot(IMailDelivery delivery, MailPool mailPool, int number, RobotStatistics stats, FloorManager floorManager) {
         this.id = "R" + number;
 
         current_state = RobotState.RETURNING;
@@ -56,6 +56,8 @@ public class Robot {
         foodAttachment = new FoodAttachment();
         mailAttachment = new MailAttachment();
         currentDeliveryAttachment = mailAttachment;
+        this.stats = stats;
+        this.floorManager = floorManager;
 
     }
 
@@ -99,13 +101,13 @@ public class Robot {
 
             case DELIVERING:
                 /* Ensure that the floor isn't locked due to another robot attempting to deliver food */
-                if (current_floor == destination_floor && FloorManager.checkFloor(current_floor, this.id)) {
+                if (current_floor == destination_floor && floorManager.checkFloor(current_floor, this.id)) {
                     /* Delivery complete, report this to the simulator! */
                     DeliveryItem tmp = currentDeliveryAttachment.deliverItem();
                     delivery.deliver(tmp);
-                    RobotStatistics.itemDelivered(tmp);
+                    stats.itemDelivered(tmp);
                     /* If succesful delivery unlock floor */
-                    FloorManager.releaseFloor(this.destination_floor);
+                    floorManager.releaseFloor(this.destination_floor);
 
                     deliveryCounter++;
                     /* Check the at robot hasn't delivered more than its capacity */
@@ -140,7 +142,7 @@ public class Robot {
         destination_floor = currentDeliveryAttachment.nextToDeliver().destinationFloor;
 
         if (currentDeliveryAttachment.equals(foodAttachment)) {
-            FloorManager.lockFloor(destination_floor, this.id);
+            floorManager.lockFloor(destination_floor, this.id);
         }
 
     }
@@ -190,7 +192,7 @@ public class Robot {
             /* If the current attachment is a mail Attachment attach food attachment */
             if (currentDeliveryAttachment.equals(mailAttachment)) {
                 /* Record statistics */
-                RobotStatistics.foodTubeAttachedCount();
+                stats.foodTubeAttachedCount();
                 this.currentDeliveryAttachment = foodAttachment;
             }
             /* If full then dispatch */

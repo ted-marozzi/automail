@@ -11,43 +11,45 @@ import java.util.stream.Collectors;
  */
 public class RobotStatistics {
 
-    private static int timesFoodTubeAttached = 0;
-    private static List<DeliveryItem> ITEMS_DELIVERED = new ArrayList<>();
+    private int timesFoodTubeAttached = 0;
+    private List<DeliveryItem> items_delivered = new ArrayList<>();
 
     /**
      * @param deliveryItem Add an item to list of items delivered
      */
-    public static void itemDelivered(DeliveryItem deliveryItem)    {
-        ITEMS_DELIVERED.add(deliveryItem);
+    public void itemDelivered(DeliveryItem deliveryItem)    {
+        items_delivered.add(deliveryItem);
     }
 
     /**
      * @return Get the number of items delivered
      */
-    public static List<DeliveryItem> getItemsDelivered() {
-        return ITEMS_DELIVERED;
+    public List<DeliveryItem> getItemsDelivered() {
+        return items_delivered;
     }
 
     /**
      * @return Return the number of times a food tube is attached.
      */
-    public static int getTimesFoodTubeAttached() {
+    public int getTimesFoodTubeAttached() {
         return timesFoodTubeAttached;
     }
 
     /**
-     * Incrememnt the counter on times food tube attached
+     * Increment the counter on times food tube attached
      */
-    public static void foodTubeAttachedCount() {
+    public void foodTubeAttachedCount() {
         timesFoodTubeAttached++;
     }
+
+
 
     /**
      * @return Total mail items delivered
      */
-    public static List<DeliveryItem> getMailItemsDelivered()   {
+    public List<DeliveryItem> getMailItemsDelivered()   {
         /* Get the mail delivered */
-        return ITEMS_DELIVERED.stream()
+        return items_delivered.stream()
                 .filter(deliveryItem -> deliveryItem instanceof MailItem)
                 .collect(Collectors.toList());
 
@@ -57,9 +59,9 @@ public class RobotStatistics {
     /**
      * @return Total food items delivered
      */
-    public static List<DeliveryItem> getFoodItemsDelivered()   {
+    public List<DeliveryItem> getFoodItemsDelivered()   {
         /* Get the mail delivered */
-        return ITEMS_DELIVERED.stream()
+        return items_delivered.stream()
                 .filter(deliveryItem -> deliveryItem instanceof FoodItem)
                 .collect(Collectors.toList());
 
@@ -68,28 +70,28 @@ public class RobotStatistics {
     /**
      * @return Total weight of the items delivered
      */
-    public static double getTotalWeight()  {
-        return ITEMS_DELIVERED.stream().mapToDouble(mail -> mail.getWeight()).sum();
+    public double getTotalWeight()  {
+        return items_delivered.stream().mapToDouble(mail -> mail.getWeight()).sum();
     }
 
     /**
      * @return Total weight of the food
      */
-    public static double getTotalFoodWeight()  {
+    public double getTotalFoodWeight()  {
         return getFoodItemsDelivered().stream().mapToDouble(mail -> mail.getWeight()).sum();
     }
 
     /**
      * @return Total weight of the mail items
      */
-    public static double getTotalMailWeight()  {
+    public double getTotalMailWeight()  {
         return getMailItemsDelivered().stream().mapToDouble(mail -> mail.getWeight()).sum();
     }
 
     /**
      * @return Number of mail items delivered
      */
-    public static int getNumberMailDelivered() {
+    public int getNumberMailDelivered() {
         return getMailItemsDelivered().size();
     }
 
@@ -97,14 +99,14 @@ public class RobotStatistics {
     /**
      * @return Number of food items delivered
      */
-    public static int getNumberFoodDelivered() {
+    public int getNumberFoodDelivered() {
         return getFoodItemsDelivered().size();
     }
 
     /**
      * @return Get total items delivered
      */
-    public static int getTotalItemsDelivered()  {
-        return ITEMS_DELIVERED.size();
+    public int getTotalItemsDelivered()  {
+        return items_delivered.size();
     }
 }

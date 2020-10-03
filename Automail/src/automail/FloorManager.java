@@ -13,7 +13,7 @@ import java.util.Queue;
 public class FloorManager {
     /* List of LIFO queues representing each floor of the building. LIFO (Last in First out) is used
      * as the robot to first lock a floor is the one who should be able to deliver next */
-    private static ArrayList<Queue<String>> lockedFloors = new ArrayList<>(Building.FLOORS);
+    private ArrayList<Queue<String>> lockedFloors = new ArrayList<>(Building.FLOORS);
 
     /**
      * Initialised the floor manager queues
@@ -28,7 +28,7 @@ public class FloorManager {
      * @param floorIndex the floor to lock
      * @param id         the robot id thats locking the floor
      */
-    public static void lockFloor(int floorIndex, String id) {
+    public void lockFloor(int floorIndex, String id) {
         lockedFloors.get(floorIndex - 1).add(id);
 
     }
@@ -36,7 +36,7 @@ public class FloorManager {
     /**
      * @param floorIndex the floor to release after food is delivered
      */
-    public static void releaseFloor(int floorIndex) {
+    public void releaseFloor(int floorIndex) {
         lockedFloors.get(floorIndex - 1).poll();
     }
 
@@ -46,7 +46,7 @@ public class FloorManager {
      * @return Returns a boolean that is true if no one has locked the floor or if the robot checking is the one
      * that has locked the floor first.
      */
-    public static boolean checkFloor(int floorIndex, String id) {
+    public boolean checkFloor(int floorIndex, String id) {
         String floorLocked = lockedFloors.get(floorIndex - 1).peek();
         return id.equals(floorLocked) || floorLocked == null;
     }

@@ -11,7 +11,7 @@ import java.util.Queue;
  * Class for robot to use to ensure that nothing is delivered to a floor that food is being delivered too
  */
 public class FloorManager {
-    /* List of LIFO queues representing each floor of the building. LIFO (Last in First out) is used
+    /* List of FIFO queues representing each floor of the building. FIFO (First in First out) is used
      * as the robot to first lock a floor is the one who should be able to deliver next */
     private ArrayList<Queue<String>> lockedFloors = new ArrayList<>(Building.FLOORS);
 
